@@ -1,0 +1,49 @@
+{
+  "name": "sfdx-plugin-source-read",
+  "description": "sfdx plugin to read Metadata via CRUD Metadata API",
+  "version": "0.0.0-development",
+  "author": "Matthias Rolke @amtrack",
+  "bugs": "https://github.com/amtrack/sfdx-plugin-source-read/issues",
+  "bin": {
+    "sfdx-plugin-source-read": "bin/run"
+  },
+  "dependencies": {
+    "@salesforce/command": "4.2.1",
+    "tslib": "2.3.1"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "1.26.10",
+    "@oclif/plugin-help": "5.1.10",
+    "@salesforce/dev-config": "3.0.0",
+    "sfdx-cli": "7.133.0",
+    "ts-node": "10.4.0",
+    "typescript": "4.5.4"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/oclif.manifest.json",
+    "/yarn.lock"
+  ],
+  "homepage": "https://github.com/amtrack/sfdx-plugin-source-read",
+  "keywords": [
+    "sfdx-plugin"
+  ],
+  "license": "MIT",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "sfdx",
+    "devPlugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "amtrack/sfdx-plugin-source-read",
+  "scripts": {
+    "build": "rm -rf lib && tsc -b && oclif-dev manifest",
+    "prepack": "yarn build",
+    "prepare": "yarn build"
+  }
+}
