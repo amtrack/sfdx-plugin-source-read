@@ -903,6 +903,21 @@
     open "^8.2.1"
     tslib "^2"
 
+"@salesforce/plugin-source@1.8.2":
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/plugin-source/-/plugin-source-1.8.2.tgz#4e5ee1eec8d0b11df55f125b88910a3df2232e8a"
+  integrity sha512-iIdw0sUH4Xn4bB9aj7ijWysP2BRNorGpI23PHgEdjHTVJ2sgE7xYNrGPvxy1WDV4d7fdEOilBtN8qB1LT1Sivg==
+  dependencies:
+    "@oclif/config" "^1.18.1"
+    "@salesforce/command" "^4.2.0"
+    "@salesforce/core" "^2.31.0"
+    "@salesforce/source-deploy-retrieve" "^5.9.1"
+    "@salesforce/source-tracking" "^0.5.1"
+    chalk "^4.1.2"
+    cli-ux "^5.6.3"
+    open "^8.2.1"
+    tslib "^2"
+
 "@salesforce/plugin-telemetry@1.4.0", "@salesforce/plugin-telemetry@^1.3.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@salesforce/plugin-telemetry/-/plugin-telemetry-1.4.0.tgz#0f17334af1085f47a28340bc387c78a633c326fe"
