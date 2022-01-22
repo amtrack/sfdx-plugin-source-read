@@ -3,7 +3,7 @@ import { ComponentSetBuilder } from "@salesforce/plugin-source/lib/componentSetB
 import { writeFileSync } from "fs";
 import { Builder } from "xml2js";
 
-export default class Org extends SfdxCommand {
+export default class SourceReadCommand extends SfdxCommand {
   public static description = "Read Metadata using the CRUD Metadata API";
 
   public static examples = [
