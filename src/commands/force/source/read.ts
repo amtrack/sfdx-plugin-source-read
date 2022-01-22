@@ -1,6 +1,5 @@
 import { flags, SfdxCommand } from "@salesforce/command";
 import { ComponentSetBuilder } from "@salesforce/plugin-source/lib/componentSetBuilder";
-import { AnyJson } from "@salesforce/ts-types";
 import { writeFileSync } from "fs";
 import { Builder } from "xml2js";
 
@@ -29,7 +28,7 @@ export default class Org extends SfdxCommand {
   protected static requiresUsername = true;
   protected static requiresProject = true;
 
-  public async run(): Promise<AnyJson> {
+  public async run(): Promise<any> {
     const conn = this.org.getConnection();
     const sourcePaths = (await this.project.getPackageDirectories()).map(
       dir => dir.path
