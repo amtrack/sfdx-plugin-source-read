@@ -903,16 +903,16 @@
     open "^8.2.1"
     tslib "^2"
 
-"@salesforce/plugin-source@1.8.2":
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/@salesforce/plugin-source/-/plugin-source-1.8.2.tgz#4e5ee1eec8d0b11df55f125b88910a3df2232e8a"
-  integrity sha512-iIdw0sUH4Xn4bB9aj7ijWysP2BRNorGpI23PHgEdjHTVJ2sgE7xYNrGPvxy1WDV4d7fdEOilBtN8qB1LT1Sivg==
+"@salesforce/plugin-source@1.8.4":
+  version "1.8.4"
+  resolved "https://registry.yarnpkg.com/@salesforce/plugin-source/-/plugin-source-1.8.4.tgz#be69f7712884aa2a36ff1f8a7850ae5c2bf018dd"
+  integrity sha512-OI3U+KeUv/Giv4gBC+qUszhvHIxVQFoPC+Q5Q9cq97qEiHTfGn/Wxb8m1D/T+fhdG71zIdcAXbjedfWG7sFiPw==
   dependencies:
     "@oclif/config" "^1.18.1"
     "@salesforce/command" "^4.2.0"
     "@salesforce/core" "^2.31.0"
-    "@salesforce/source-deploy-retrieve" "^5.9.1"
-    "@salesforce/source-tracking" "^0.5.1"
+    "@salesforce/source-deploy-retrieve" "^5.9.3"
+    "@salesforce/source-tracking" "^1.0.0"
     chalk "^4.1.2"
     cli-ux "^5.6.3"
     open "^8.2.1"
@@ -1011,6 +1011,22 @@
     unzipper "0.10.11"
     xmldom-sfdx-encoding "^0.1.29"
 
+"@salesforce/source-deploy-retrieve@^5.9.3":
+  version "5.9.3"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-5.9.3.tgz#e1da99a0f85b01e31821c681b4196296125892bb"
+  integrity sha512-kqMI72Wk63Od4HgEiIkkmVBPWizdRdZGu/5ZzWkxphuSZmOgmaFKlIbsR03IR4D5n38bAs7vrSMNZvKp7HwhyQ==
+  dependencies:
+    "@salesforce/core" "2.33.1"
+    "@salesforce/kit" "^1.5.0"
+    "@salesforce/ts-types" "^1.4.2"
+    archiver "^5.3.0"
+    fast-xml-parser "^3.17.4"
+    graceful-fs "^4.2.8"
+    ignore "^5.1.8"
+    mime "2.6.0"
+    unzipper "0.10.11"
+    xmldom-sfdx-encoding "^0.1.29"
+
 "@salesforce/source-tracking@^0.4.4":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@salesforce/source-tracking/-/source-tracking-0.4.4.tgz#5971242763fa5067d585a8280fabd51b588fae7d"
@@ -1030,6 +1046,17 @@
     "@salesforce/core" "^2.33.1"
     "@salesforce/kit" "^1.5.17"
     "@salesforce/source-deploy-retrieve" "^5.8.2"
+    isomorphic-git "^1.9.2"
+    ts-retry-promise "^0.6.0"
+
+"@salesforce/source-tracking@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-tracking/-/source-tracking-1.0.0.tgz#577edcf2ad0d4a86b26b0fc007f46d15fa1aec2f"
+  integrity sha512-4HmAeD3s8OJGG54jkpv9BLufLcNXpFLbrmjefkRcUpnLBeGlS8L2l0wm/GtRE5LVtxFKD85j6BaciyjVv4TYfA==
+  dependencies:
+    "@salesforce/core" "^2.33.1"
+    "@salesforce/kit" "^1.5.17"
+    "@salesforce/source-deploy-retrieve" "^5.9.3"
     isomorphic-git "^1.9.2"
     ts-retry-promise "^0.6.0"
 
