@@ -16,7 +16,7 @@
     "@oclif/dev-cli": "1.26.10",
     "@oclif/plugin-help": "5.1.10",
     "@salesforce/dev-config": "3.0.0",
-    "sfdx-cli": "7.136.2",
+    "sfdx-cli": "7.143.0",
     "ts-node": "10.4.0",
     "typescript": "4.5.5"
   },
