@@ -1,6 +1,8 @@
 import { flags, SfdxCommand } from "@salesforce/command";
 import { ComponentSetBuilder } from "@salesforce/source-deploy-retrieve";
-import { writeFileSync } from "fs";
+import { filePathsFromMetadataComponent } from "@salesforce/source-deploy-retrieve/lib/src/utils/filePathGenerator";
+import { mkdir, writeFile } from "fs/promises";
+import { dirname, join } from "path";
 import { Builder } from "xml2js";
 
 export default class SourceReadCommand extends SfdxCommand {
@@ -30,9 +32,9 @@ export default class SourceReadCommand extends SfdxCommand {
 
   public async run(): Promise<any> {
     const conn = this.org.getConnection();
-    const sourcePaths = (await this.project.getPackageDirectories()).map(
-      dir => dir.path
-    );
+    const packageDirectories = this.project.getPackageDirectories();
+    const defaultPackageDirectory = this.project.getDefaultPackage().path;
+    const sourcePaths = packageDirectories.map((dir) => dir.path);
     const componentSet = await ComponentSetBuilder.build({
       sourcepath:
         this.flags.sourcepath &&
@@ -55,7 +57,15 @@ export default class SourceReadCommand extends SfdxCommand {
       const mdJson = await conn.metadata.read(component.type.name, [
         component.fullName
       ]);
-      writeFileSync(component["xml"], convertToXml(component, mdJson));
+      let filePath = component.xml;
+      if (!filePath) {
+        filePath = filePathsFromMetadataComponent(
+          component,
+          join(defaultPackageDirectory, "main", "default")
+        ).find((p) => p.endsWith(`.${component.type.suffix}-meta.xml`));
+        await mkdir(dirname(filePath), { recursive: true });
+      }
+      await writeFile(filePath, convertToXml(component, mdJson));
     }
 
     return;
