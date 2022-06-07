@@ -1,5 +1,5 @@
 import { flags, SfdxCommand } from "@salesforce/command";
-import { ComponentSetBuilder } from "@salesforce/plugin-source/lib/componentSetBuilder";
+import { ComponentSetBuilder } from "@salesforce/source-deploy-retrieve";
 import { writeFileSync } from "fs";
 import { Builder } from "xml2js";
 
