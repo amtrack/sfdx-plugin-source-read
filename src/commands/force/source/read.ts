@@ -1,5 +1,8 @@
 import { flags, SfdxCommand } from "@salesforce/command";
-import { ComponentSetBuilder } from "@salesforce/source-deploy-retrieve";
+import {
+  ComponentSetBuilder,
+  SourceComponent,
+} from "@salesforce/source-deploy-retrieve";
 import { filePathsFromMetadataComponent } from "@salesforce/source-deploy-retrieve/lib/src/utils/filePathGenerator";
 import { mkdir, writeFile } from "fs/promises";
 import { dirname, join } from "path";
@@ -57,8 +60,10 @@ export default class SourceReadCommand extends SfdxCommand {
       const mdJson = await conn.metadata.read(component.type.name, [
         component.fullName
       ]);
-      let filePath = component.xml;
-      if (!filePath) {
+      let filePath;
+      if (component instanceof SourceComponent) {
+        filePath = component.xml;
+      } else {
         filePath = filePathsFromMetadataComponent(
           component,
           join(defaultPackageDirectory, "main", "default")
