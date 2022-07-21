@@ -8,7 +8,7 @@
     "sfdx-plugin-source-read": "bin/run"
   },
   "dependencies": {
-    "@salesforce/command": "4.2.2",
+    "@salesforce/command": "5.2.1",
     "@salesforce/source-deploy-retrieve": "6.0.2",
     "tslib": "2.3.1"
   },
