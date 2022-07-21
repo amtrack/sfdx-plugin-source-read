@@ -1351,20 +1351,22 @@
     signal-exit "^3.0.6"
     tslib "^2.3.1"
 
-"@salesforce/source-deploy-retrieve@6.0.2":
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-6.0.2.tgz#7f3441f4ecf1244bf7f2f3487374d8e9324411d1"
-  integrity sha512-JiJBMkY/ER4GhVymhMuRpguPXxHL1E3MIDM0yw/q1Bc1UBFUj9gGS/I4UvSmQ3ma2S/BrbZnYwfdAzyz8n+56Q==
+"@salesforce/source-deploy-retrieve@6.2.5":
+  version "6.2.5"
+  resolved "https://registry.yarnpkg.com/@salesforce/source-deploy-retrieve/-/source-deploy-retrieve-6.2.5.tgz#f5b0a04f80a06274867191cf99d648e968897f8a"
+  integrity sha512-xOhdMyWsGHoyhugosrsuQ02Gx5NkxrFUFEcSnoVsoij6EMQZmdL+WMc9ocVKerMbpDVRR8zX81zmKBAps1C0WQ==
   dependencies:
-    "@salesforce/core" "^3.19.0"
+    "@salesforce/core" "^3.21.1"
     "@salesforce/kit" "^1.5.41"
     "@salesforce/ts-types" "^1.5.20"
     archiver "^5.3.0"
     fast-xml-parser "^3.17.4"
-    got "^11.8.2"
+    got "^11.8.5"
     graceful-fs "^4.2.8"
     ignore "^5.1.8"
     mime "2.6.0"
+    proxy-agent "^5.0.0"
+    proxy-from-env "^1.1.0"
     unzipper "0.10.11"
     xmldom-sfdx-encoding "^0.1.29"
 
