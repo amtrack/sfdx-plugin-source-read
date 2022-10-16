@@ -26,8 +26,7 @@
   "files": [
     "/bin",
     "/lib",
-    "/oclif.manifest.json",
-    "/yarn.lock"
+    "/oclif.manifest.json"
   ],
   "homepage": "https://github.com/amtrack/sfdx-plugin-source-read",
   "keywords": [
