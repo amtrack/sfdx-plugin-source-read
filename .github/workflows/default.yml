@@ -1,0 +1,38 @@
+name: Test and Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  default:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: |
+          yarn install
+          yarn global add sfdx-cli
+      - name: Run tests
+        run: yarn run test
+      - name: Run E2E tests
+        env:
+          SFDX_AUTH_URL_DEVHUB: ${{ secrets.SFDX_AUTH_URL_DEVHUB }}
+        run: |
+          sfdx auth:sfdxurl:store -d -a devhub -f /dev/stdin <<< "${SFDX_AUTH_URL_DEVHUB}"
+          sfdx force:org:create -f config/project-scratch-def.json -s
+          yarn run test:e2e
+      - name: Release package
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
