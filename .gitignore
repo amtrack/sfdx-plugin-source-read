@@ -5,6 +5,8 @@
 /lib
 /package-lock.json
 /tmp
-node_modules
-/.sfdx/
+node_modules/
+.sfdx/
+.sf/
 /oclif.manifest.json
+/force-app/main/
