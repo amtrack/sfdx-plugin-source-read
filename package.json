@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@salesforce/command": "5.2.16",
-    "@salesforce/source-deploy-retrieve": "7.4.0",
+    "@salesforce/source-deploy-retrieve": "8.6.0",
     "tslib": "2.4.0"
   },
   "devDependencies": {
