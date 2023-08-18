@@ -10,7 +10,7 @@
   "dependencies": {
     "@salesforce/command": "5.2.16",
     "@salesforce/source-deploy-retrieve": "7.4.0",
-    "tslib": "2.4.0"
+    "tslib": "2.6.2"
   },
   "devDependencies": {
     "@oclif/test": "2.3.20",
