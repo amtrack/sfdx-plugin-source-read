@@ -6,11 +6,7 @@ import { convertToXml, parseCommaSeparatedValues } from "../src/utils";
 describe("utils", () => {
   describe("parseCommaSeparatedValues", () => {
     it("should parse", () => {
-      expect(parseCommaSeparatedValues("foo-bar,baz,bazn")).to.deep.equal([
-        "foo-bar",
-        "baz",
-        "bazn",
-      ]);
+      expect(parseCommaSeparatedValues("foo-bar,baz,bazn")).to.deep.equal(["foo-bar", "baz", "bazn"]);
     });
   });
   describe("convertToXml", () => {
@@ -31,10 +27,7 @@ describe("utils", () => {
           },
         ],
       };
-      const mdXml = readFileSync(
-        join("test", "fixtures", "Admin.profile-meta.xml"),
-        "utf8"
-      );
+      const mdXml = readFileSync(join("test", "fixtures", "Admin.profile-meta.xml"), "utf8");
       expect(convertToXml(component, data)).to.deep.equal(mdXml);
     });
   });

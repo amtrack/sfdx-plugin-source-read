@@ -8,20 +8,21 @@
     "sfdx-plugin-source-read": "bin/run"
   },
   "dependencies": {
-    "@salesforce/command": "5.2.16",
-    "@salesforce/source-deploy-retrieve": "7.4.0",
-    "tslib": "2.4.0"
+    "@salesforce/sf-plugins-core": "4.0.0",
+    "@salesforce/source-deploy-retrieve": "9.7.28"
   },
   "devDependencies": {
-    "@oclif/test": "2.3.20",
-    "@types/mocha": "10.0.1",
-    "chai": "4.3.7",
+    "@salesforce/dev-config": "4.0.1",
+    "@salesforce/prettier-config": "0.0.3",
+    "@types/mocha": "10.0.3",
+    "chai": "4.3.10",
     "execa": "5.1.1",
     "mocha": "10.2.0",
     "nyc": "15.1.0",
-    "oclif": "3.9.0",
+    "oclif": "4.0.3",
+    "prettier": "3.0.3",
     "ts-node": "10.9.1",
-    "typescript": "5.0.4"
+    "typescript": "5.2.2"
   },
   "engines": {
     "node": ">=14.16"
@@ -38,7 +39,8 @@
   "license": "MIT",
   "oclif": {
     "commands": "./lib/commands",
-    "bin": "sfdx",
+    "bin": "sf",
+    "topicSeparator": " ",
     "additionalHelpFlags": [
       "-h"
     ]
@@ -48,7 +50,7 @@
     "build": "rm -rf lib && tsc -p . && oclif manifest",
     "prepack": "yarn build",
     "prepare": "yarn build",
-    "test": "nyc --reporter=lcov --reporter=text mocha --require ts-node/register \"test/**/*.test.ts\"",
-    "test:e2e": "mocha --require ts-node/register --timeout 60000 \"test/**/*.e2e.ts\""
+    "test": "tsc -p test && nyc --reporter=lcov --reporter=text mocha --require ts-node/register \"test/**/*.test.ts\"",
+    "test:e2e": "tsc -p test && mocha --require ts-node/register --timeout 60000 \"test/**/*.e2e.ts\""
   }
 }

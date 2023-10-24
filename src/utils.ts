@@ -1,8 +1,6 @@
 import { Builder } from "xml2js";
 
-export function parseCommaSeparatedValues(
-  commaSeparatedMetadataComponentNames
-) {
+export function parseCommaSeparatedValues(commaSeparatedMetadataComponentNames) {
   if (!commaSeparatedMetadataComponentNames) {
     return [];
   }
