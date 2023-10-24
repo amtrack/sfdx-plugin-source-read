@@ -1,15 +1,12 @@
 {
+  "extends": "@salesforce/dev-config/tsconfig",
+  "include": ["./src/**/*.ts"],
   "compilerOptions": {
     "outDir": "lib",
-    "module": "commonjs",
-    "target": "es2020",
-    "lib": ["es2020"],
-    "sourceMap": true,
-    "declaration": true,
-    "moduleResolution": "node",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "strictNullChecks": true,
     "esModuleInterop": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true
-  },
-  "include": ["./src/**/*.ts"]
+    "declaration": false,
+  }
 }
