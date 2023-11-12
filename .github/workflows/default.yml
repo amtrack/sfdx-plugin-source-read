@@ -28,7 +28,7 @@ jobs:
         env:
           SFDX_AUTH_URL_DEVHUB: ${{ secrets.SFDX_AUTH_URL_DEVHUB }}
         run: |
-          sf org login sfdx-url -d -a devhub -f /dev/stdin <<< "${SFDX_AUTH_URL_DEVHUB}"
+          sf org login sfdx-url -d -a devhub -f <(echo "${SFDX_AUTH_URL_DEVHUB}")
           sf org create scratch -f config/project-scratch-def.json -d
           yarn run test:e2e
       - name: Delete scratch org
