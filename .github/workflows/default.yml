@@ -13,28 +13,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
       - name: Install dependencies
         run: |
-          yarn install
-          yarn global add @salesforce/cli
+          npm ci
+          npm install --global @salesforce/cli
       - name: Run tests
-        run: yarn run test
+        run: npm run test
       - name: Run E2E tests
         env:
           SFDX_AUTH_URL_DEVHUB: ${{ secrets.SFDX_AUTH_URL_DEVHUB }}
         run: |
-          sf org login sfdx-url -d -a devhub -f <(echo "${SFDX_AUTH_URL_DEVHUB}")
-          sf org create scratch -f config/project-scratch-def.json -d
-          yarn run test:e2e
+          echo "${SFDX_AUTH_URL_DEVHUB}" | sf org login sfdx-url --set-default-dev-hub --alias devhub --sfdx-url-stdin
+          sf org create scratch -f config/project-scratch-def.json --set-default
+          npm run test:e2e
       - name: Delete scratch org
         if: always()
         run: |
-          sf org delete scratch -p
+          sf org delete scratch --no-prompt
       - name: Release package
         run: npx semantic-release
         env:

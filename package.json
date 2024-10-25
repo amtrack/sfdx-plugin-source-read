@@ -4,28 +4,18 @@
   "version": "0.0.0-development",
   "author": "Matthias Rolke @amtrack",
   "bugs": "https://github.com/amtrack/sfdx-plugin-source-read/issues",
+  "type": "module",
   "bin": {
     "sfdx-plugin-source-read": "bin/run"
   },
   "dependencies": {
-    "@salesforce/sf-plugins-core": "4.0.0",
-    "@salesforce/source-deploy-retrieve": "9.7.28"
+    "@salesforce/sf-plugins-core": "12.0.8",
+    "@salesforce/source-deploy-retrieve": "12.8.1"
   },
   "devDependencies": {
-    "@salesforce/dev-config": "4.1.0",
-    "@salesforce/prettier-config": "0.0.3",
-    "@types/mocha": "10.0.4",
-    "chai": "4.3.10",
-    "execa": "5.1.1",
-    "mocha": "10.2.0",
-    "nyc": "15.1.0",
-    "oclif": "4.0.3",
-    "prettier": "3.1.0",
-    "ts-node": "10.9.1",
-    "typescript": "5.2.2"
-  },
-  "engines": {
-    "node": ">=14.16"
+    "@salesforce/dev-scripts": "10.2.10",
+    "execa": "9.4.1",
+    "oclif": "4.15.12"
   },
   "files": [
     "/bin",
@@ -34,7 +24,8 @@
   ],
   "homepage": "https://github.com/amtrack/sfdx-plugin-source-read",
   "keywords": [
-    "sfdx-plugin"
+    "sfdx-plugin",
+    "sf-plugin"
   ],
   "license": "MIT",
   "oclif": {
@@ -45,12 +36,16 @@
       "-h"
     ]
   },
+  "mocha": {
+    "loader": "ts-node/esm",
+    "no-warnings": "ExperimentalWarning"
+  },
   "repository": "amtrack/sfdx-plugin-source-read",
   "scripts": {
     "build": "rm -rf lib && tsc -p . && oclif manifest",
-    "prepack": "yarn build",
-    "prepare": "yarn build",
-    "test": "tsc -p test && nyc --reporter=lcov --reporter=text mocha --require ts-node/register \"test/**/*.test.ts\"",
-    "test:e2e": "tsc -p test && mocha --require ts-node/register --timeout 60000 \"test/**/*.e2e.ts\""
+    "prepack": "npm run build",
+    "prepare": "npm run build",
+    "test": "tsc -p test && nyc --reporter=lcov --reporter=text mocha \"test/**/*.test.ts\"",
+    "test:e2e": "tsc -p test && mocha --timeout 60000 \"test/**/*.e2e.ts\""
   }
 }

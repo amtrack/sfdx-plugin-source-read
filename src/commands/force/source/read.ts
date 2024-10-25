@@ -1,10 +1,10 @@
+import type { MetadataType } from "@jsforce/jsforce-node/lib/api/metadata.js";
 import { Flags, SfCommand, requiredOrgFlagWithDeprecations } from "@salesforce/sf-plugins-core";
 import { ComponentSetBuilder, SourceComponent } from "@salesforce/source-deploy-retrieve";
-import { filePathsFromMetadataComponent } from "@salesforce/source-deploy-retrieve/lib/src/utils/filePathGenerator";
+import { filePathsFromMetadataComponent } from "@salesforce/source-deploy-retrieve/lib/src/utils/filePathGenerator.js";
 import { mkdir, writeFile } from "fs/promises";
-import type { MetadataType } from "jsforce/api/metadata";
 import { dirname, join } from "path";
-import { convertToXml, parseCommaSeparatedValues } from "../../../utils";
+import { convertToXml, parseCommaSeparatedValues } from "../../../utils.js";
 
 export class SourceReadCommand extends SfCommand<any> {
   public static readonly summary = "Read Metadata using the CRUD Metadata API";
@@ -40,10 +40,6 @@ export class SourceReadCommand extends SfCommand<any> {
     const sourcePaths = packageDirectories.map((dir) => dir.path);
     const componentSet = await ComponentSetBuilder.build({
       sourcepath: flags.sourcepath && parseCommaSeparatedValues(flags.sourcepath),
-      manifest: flags.manifest && {
-        manifestPath: flags.manifest,
-        directoryPaths: sourcePaths,
-      },
       ...(flags.metadata && {
         metadata: {
           metadataEntries: parseCommaSeparatedValues(flags.metadata),

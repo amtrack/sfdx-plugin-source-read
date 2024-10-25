@@ -1,9 +1,7 @@
 {
-  "extends": "@salesforce/dev-config/tsconfig-test",
+  "extends": "@salesforce/dev-config/tsconfig-test-esm.json",
   "include": ["./**/*.ts"],
   "compilerOptions": {
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "esModuleInterop": true
+    "skipLibCheck": true
   }
 }
