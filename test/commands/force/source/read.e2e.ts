@@ -1,4 +1,4 @@
-import { run } from "../../../e2e";
+import { run } from "../../../e2e.js";
 import { expect } from "chai";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";

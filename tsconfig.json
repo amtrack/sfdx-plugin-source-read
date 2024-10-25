@@ -1,12 +1,9 @@
 {
-  "extends": "@salesforce/dev-config/tsconfig",
-  "include": ["./src/**/*.ts"],
+  "extends": "@salesforce/dev-config/tsconfig-esm.json",
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "esModuleInterop": true,
-    "declaration": false,
-  }
+    "skipLibCheck": true
+  },
+  "include": ["./src/**/*.ts"]
 }

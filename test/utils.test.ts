@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { convertToXml, parseCommaSeparatedValues } from "../src/utils";
+import { convertToXml, parseCommaSeparatedValues } from "../src/utils.js";
 
 describe("utils", () => {
   describe("parseCommaSeparatedValues", () => {
