@@ -36,6 +36,12 @@ export class SourceReadCommand extends SfCommand<any> {
       summary: `comma-separated list of source file paths to retrieve
       Example: 'force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml,force-app/main/default/profiles/Admin.profile-meta.xml'`,
     }),
+    "chunk-size": Flags.integer({
+      summary: "number of components to be read per API call",
+      description: "The limit for readMetadata() is 10. For CustomMetadata and CustomApplication only, the limit is 200.",
+      max: 10,
+      default: 10
+    })
   };
 
   public static readonly requiresProject = true;
@@ -64,7 +70,7 @@ export class SourceReadCommand extends SfCommand<any> {
       const chunkSize =
         typeName === "CustomApplication" || typeName === "CustomMetadata"
           ? 200
-          : 10;
+          : flags["chunk-size"];
       for (const chunkOfMemberNames of chunk(typeMember.members, chunkSize)) {
         const componentNames = chunkOfMemberNames.map(
           (memberName) => `${typeName}:${memberName}`
