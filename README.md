@@ -1,6 +1,6 @@
 # sfdx-plugin-source-read
 
-> sfdx/sf plugin to read Metadata via CRUD Metadata API
+> sfdx/sf plugin to read Metadata e.g. full Profiles via CRUD Metadata API
 
 For certain Metadata Types there is a different behaviour of the [file-based](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_retrieve.htm) vs. [CRUD-based](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm) Metadata API.
 

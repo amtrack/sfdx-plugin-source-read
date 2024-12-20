@@ -1,6 +1,6 @@
 {
   "name": "sfdx-plugin-source-read",
-  "description": "sfdx plugin to read Metadata via CRUD Metadata API",
+  "description": "sfdx plugin to read Metadata e.g. full Profiles via CRUD Metadata API",
   "version": "0.0.0-development",
   "author": "Matthias Rolke @amtrack",
   "bugs": "https://github.com/amtrack/sfdx-plugin-source-read/issues",

@@ -16,7 +16,7 @@ import { convertToXml, parseCommaSeparatedValues } from "../../../utils.js";
 export class SourceReadCommand extends SfCommand<any> {
   public static readonly summary = "Read Metadata using the CRUD Metadata API";
   public static readonly description =
-    "Read Metadata using the CRUD Metadata API";
+    "Read Metadata e.g. full Profiles using the CRUD Metadata API";
 
   public static readonly examples = [
     `$ <%= config.bin %> <%= command.id %> -m "Profile:Admin"`,
