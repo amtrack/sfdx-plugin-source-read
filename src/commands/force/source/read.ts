@@ -21,6 +21,7 @@ export class SourceReadCommand extends SfCommand<any> {
   public static readonly examples = [
     `$ <%= config.bin %> <%= command.id %> -m "Profile:Admin"`,
     `$ <%= config.bin %> <%= command.id %> -m "RecordType:Account.Business"`,
+    `$ <%= config.bin %> <%= command.id %> -m "CustomObjectTranslation:Task-de"`,
     `$ <%= config.bin %> <%= command.id %> -p force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml`,
   ];
 

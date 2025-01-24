@@ -9,6 +9,8 @@ This plugin provides a `sf force source read` command to read Metadata using the
 > [!NOTE]
 > This plugin simply returns the unfiltered response from the CRUD-based Metadata API.
 
+In addition to retrieving `Profiles`, this plugin is useful for retrieving `RecordTypes` and `CustomObjectTranslations`.
+
 ## Installation
 
 ```console
@@ -22,6 +24,7 @@ sf force source read -m "Profile:Admin"
 sf force source read -p force-app/main/default/profiles/Admin.profile-meta.xml
 sf force source read -m "RecordType:Account.Business"
 sf force source read -p force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml
+sf force source read -m "CustomObjectTranslation:Task-de"
 ```
 
 ## Example
@@ -48,7 +51,3 @@ It returns a kind of "full" Profile independent of source tracking and even cont
 > Unfortunately Profiles might include `tabVisibilites` for tabs not available in the org (see [#66](https://github.com/amtrack/sfdx-plugin-source-read/issues/66)).
 >
 > Without further processing this will cause deployment errrors.
-
-## Disclaimer
-
-Currently this has been tested only for `Profiles` and `RecordTypes`.
