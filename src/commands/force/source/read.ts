@@ -39,10 +39,11 @@ export class SourceReadCommand extends SfCommand<any> {
     }),
     "chunk-size": Flags.integer({
       summary: "number of components to be read per API call",
-      description: "The limit for readMetadata() is 10. For CustomMetadata and CustomApplication only, the limit is 200.",
+      description:
+        "The limit for readMetadata() is 10. For CustomMetadata and CustomApplication only, the limit is 200.",
       max: 10,
-      default: 10
-    })
+      default: 10,
+    }),
   };
 
   public static readonly requiresProject = true;
