@@ -6,7 +6,7 @@
   "bugs": "https://github.com/amtrack/sfdx-plugin-source-read/issues",
   "type": "module",
   "bin": {
-    "sfdx-plugin-source-read": "bin/run"
+    "sfdx-plugin-source-read": "bin/run.js"
   },
   "dependencies": {
     "@salesforce/sf-plugins-core": "12.1.3",
@@ -17,6 +17,7 @@
     "execa": "9.5.2",
     "oclif": "4.17.25"
   },
+  "exports": "./lib/index.js",
   "files": [
     "/bin",
     "/lib",
@@ -34,7 +35,12 @@
     "topicSeparator": " ",
     "additionalHelpFlags": [
       "-h"
-    ]
+    ],
+    "topics": {
+      "crud-mdapi": {
+        "description": "Work with the CRUD Metadata API."
+      }
+    }
   },
   "mocha": {
     "loader": "ts-node/esm",

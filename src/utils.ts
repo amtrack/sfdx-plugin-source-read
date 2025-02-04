@@ -13,7 +13,7 @@ export function parseCommaSeparatedValues(
 }
 
 export function convertToXml(component, data) {
-  if (["CustomObject", "Workflow"].includes(component.parent?.type?.name)) {
+  if (["CustomObject", "Workflow"].includes(component.parentType?.name)) {
     // remove first part of fullName separated by dot
     data.fullName = component.fullName.split(".")[1];
   } else {
@@ -40,4 +40,22 @@ export function convertToXml(component, data) {
       },
     }) + "\n"
   );
+}
+
+export function chunk(input, size) {
+  return input.reduce((arr, item, idx) => {
+    return idx % size === 0
+      ? [...arr, [item]]
+      : [...arr.slice(0, -1), [...arr.slice(-1)[0], item]];
+  }, []);
+}
+
+export function groupBy<T>(
+  array: T[],
+  predicate: (value: T, index: number, array: T[]) => string
+) {
+  return array.reduce((acc, value, index, array) => {
+    (acc[predicate(value, index, array)] ||= []).push(value);
+    return acc;
+  }, {} as { [key: string]: T[] });
 }

@@ -4,7 +4,7 @@
 
 For certain Metadata Types there is a different behaviour of the [file-based](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_retrieve.htm) vs. [CRUD-based](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm) Metadata API.
 
-This plugin provides a `sf force source read` command to read Metadata using the "CRUD-based" Metadata API similar to `sf force source retrieve` (which uses the "file-based" Metadata API).
+This plugin provides a `sf crud-mdapi read` (formerly `sf force source read`) command to read Metadata using the "CRUD-based" Metadata API similar to `sf project retrieve start` (which uses the "file-based" Metadata API).
 
 > [!NOTE]
 > This plugin simply returns the unfiltered response from the CRUD-based Metadata API.
@@ -20,11 +20,11 @@ sf plugins install sfdx-plugin-source-read
 ## Usage
 
 ```console
-sf force source read -m "Profile:Admin"
-sf force source read -p force-app/main/default/profiles/Admin.profile-meta.xml
-sf force source read -m "RecordType:Account.Business"
-sf force source read -p force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml
-sf force source read -m "CustomObjectTranslation:Task-de"
+sf crud-mdapi read --metadata "Profile:Admin"
+sf crud-mdapi read --source-dir force-app/main/default/profiles/Admin.profile-meta.xml
+sf crud-mdapi read --metadata "RecordType:Account.Business"
+sf crud-mdapi read --source-dir force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml
+sf crud-mdapi read --metadata "CustomObjectTranslation:Task-de"
 ```
 
 ## Example

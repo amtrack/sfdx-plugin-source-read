@@ -3,5 +3,9 @@
   "edition": "Developer",
   "language": "en_US",
   "features": [],
-  "settings": {}
+  "settings": {
+    "languageSettings": {
+      "enableTranslationWorkbench": true
+    }
+  }
 }
