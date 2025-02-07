@@ -33,11 +33,6 @@ export async function crudReadComponentSet(
     const memberNames = members.map((m) => m.fullName);
     const mdType = registry.getTypeByName(typeName);
     const parentType = registry.getParentType(typeName);
-    if (parentType) {
-      throw new Error(
-        `Reading child types (${typeName} < ${parentType.name}) is not yet implemented.`
-      );
-    }
     // https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm
     const chunkSize =
       typeName === "CustomApplication" || typeName === "CustomMetadata"
@@ -59,12 +54,34 @@ export async function crudReadComponentSet(
             `Failed to retrieve ${typeName}:${chunkOfMemberNames[i]}.`
           );
         }
-        const filePath = `${mdType.directoryName}/${metadataResult.fullName}.${mdType.suffix}`;
-        const stream = new JsToXml(
-          Object.fromEntries([[typeName, metadataResult]])
-        );
+        let props;
+        let obj;
+        if (parentType) {
+          // TODO: more reliable way to get parent and childname
+          const [parentName, childName] = metadataResult.fullName.split(".");
+          props = {
+            type: parentType,
+            name: parentName,
+            xml: `${parentType.directoryName}/${parentName}.${parentType.suffix}`,
+          };
+          metadataResult.fullName = childName;
+          obj = Object.fromEntries([
+            [
+              parentType.name,
+              Object.fromEntries([[mdType.directoryName, metadataResult]]),
+            ],
+          ]);
+        } else {
+          props = {
+            type: mdType,
+            name: metadataResult.fullName,
+            xml: `${mdType.directoryName}/${metadataResult.fullName}.${mdType.suffix}`,
+          };
+          obj = Object.fromEntries([[typeName, metadataResult]]);
+        }
+        const stream = new JsToXml(obj);
         const zipBuffer = new ZipWriter();
-        zipBuffer.addToZip(stream, filePath);
+        zipBuffer.addToZip(stream, props.xml);
         await zipBuffer._final((err?) => {
           if (err) {
             console.error(err);
@@ -73,17 +90,7 @@ export async function crudReadComponentSet(
         const zipTreeContainer = await ZipTreeContainer.create(
           zipBuffer.buffer
         );
-        result.add(
-          new SourceComponent(
-            {
-              type: mdType,
-              name: metadataResult.fullName,
-              parentType,
-              xml: filePath,
-            },
-            zipTreeContainer
-          )
-        );
+        result.add(new SourceComponent(props, zipTreeContainer));
       }
     }
   }

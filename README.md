@@ -4,6 +4,13 @@
 
 For certain Metadata Types there is a different behaviour of the [file-based](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_retrieve.htm) vs. [CRUD-based](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm) Metadata API.
 
+And additionally the file-based Metadata API even behaves differently for source-tracked vs. non-source-tracked orgs.
+
+> [!IMPORTANT]
+> The CRUD-based Metadata API can be of great help when working with non-source-tracked orgs.
+>
+> Read more about about this in my [mdapi-issues/retrieve-behavior-scratch-org](https://github.com/mdapi-issues/retrieve-behavior-scratch-org) repository.
+
 This plugin provides a `sf crud-mdapi read` (formerly `sf force source read`) command to read Metadata using the "CRUD-based" Metadata API similar to `sf project retrieve start` (which uses the "file-based" Metadata API).
 
 > [!NOTE]
