@@ -42,7 +42,7 @@ export function convertToXml(component, data) {
   );
 }
 
-export function chunk(input, size) {
+export function chunk<T>(input: T[], size: number): T[][] {
   return input.reduce((arr, item, idx) => {
     return idx % size === 0
       ? [...arr, [item]]

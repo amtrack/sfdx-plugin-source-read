@@ -4,7 +4,7 @@ import {
   ConvertOutputConfig,
   MetadataConverter,
 } from "@salesforce/source-deploy-retrieve";
-import { crudReadComponentSet } from "../../index.js";
+import { readComponentSetFromOrg } from "../../index.js";
 
 export class CrudMdapiRead extends SfCommand<unknown> {
   public static readonly summary = "Read Metadata using the CRUD Metadata API";
@@ -61,17 +61,21 @@ export class CrudMdapiRead extends SfCommand<unknown> {
 
     const componentSet = await ComponentSetBuilder.build({
       sourcepath: flags["source-dir"],
-      ...(flags.metadata && {
-        metadata: {
-          metadataEntries: flags.metadata,
-          directoryPaths: this.project
-            .getPackageDirectories()
-            .map((dir) => dir.path),
-        },
-      }),
+      ...(flags.metadata
+        ? {
+            metadata: {
+              metadataEntries: flags.metadata,
+              directoryPaths: flags["output-dir"]
+                ? []
+                : this.project
+                    .getUniquePackageDirectories()
+                    .map((dir) => dir.fullPath),
+            },
+          }
+        : {}),
     });
     const connection = flags["target-org"].getConnection();
-    const readComponentSet = await crudReadComponentSet(
+    const readComponentSet = await readComponentSetFromOrg(
       componentSet,
       connection,
       flags["chunk-size"]

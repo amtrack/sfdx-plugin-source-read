@@ -1,7 +1,8 @@
-import type { MetadataType as JsforceMetadataType } from "@jsforce/jsforce-node/lib/api/metadata.js";
+import type { MetadataType as MetadataTypeName } from "@jsforce/jsforce-node/lib/api/metadata.js";
 import { SfProject, type Connection } from "@salesforce/core";
 import {
   ComponentSet,
+  MetadataType,
   RegistryAccess,
   SourceComponent,
   ZipTreeContainer,
@@ -17,82 +18,123 @@ export type ReadOptions = {
   outputDirectory?: string;
 };
 
-export async function crudReadComponentSet(
+export async function readComponentSetFromOrg(
   componentSet: ComponentSet,
   connection: Connection,
-  defaultChunkSize: number
+  maxChunkSize?: number
 ): Promise<ComponentSet> {
   const registry = new RegistryAccess(
     undefined,
     SfProject.getInstance()?.getPath()
   );
-  const groupedByType = groupBy(componentSet.toArray(), (c) => c.type.name);
+  const componentsByType = groupBy(
+    componentSet.toArray(),
+    (cmp) => cmp.type.name
+  );
+  const resultSet = new ComponentSet();
 
-  const result = new ComponentSet();
-  for (const [typeName, members] of Object.entries(groupedByType)) {
-    const memberNames = members.map((m) => m.fullName);
+  for (const [typeName, components] of Object.entries(componentsByType)) {
     const mdType = registry.getTypeByName(typeName);
     const parentType = registry.getParentType(typeName);
-    // https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm
+    const memberNames = components.map((cmp) => cmp.fullName);
     const chunkSize =
-      typeName === "CustomApplication" || typeName === "CustomMetadata"
-        ? 200
-        : defaultChunkSize;
-    for (const chunkOfMemberNames of chunk(memberNames, chunkSize)) {
-      const componentNames = chunkOfMemberNames.map(
-        (memberName) => `${typeName}:${memberName}`
-      );
-      console.log("reading", `${componentNames.join(", ")}`, "...");
-      const metadataResults = await connection.metadata.read(
-        typeName as JsforceMetadataType,
-        chunkOfMemberNames
+      maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
+
+    for (const memberNameChunk of chunk(memberNames, chunkSize)) {
+      const metadataResults = await fetchMetadataFromOrg(
+        connection,
+        typeName,
+        memberNameChunk
       );
 
-      for (const [i, metadataResult] of metadataResults.entries()) {
-        if (!metadataResult?.fullName) {
+      for (const [index, result] of metadataResults.entries()) {
+        if (!result?.fullName) {
           throw new Error(
-            `Failed to retrieve ${typeName}:${chunkOfMemberNames[i]}.`
+            `Failed to retrieve ${typeName}:${memberNameChunk[index]}`
           );
         }
-        let props;
-        let obj;
-        if (parentType) {
-          // TODO: more reliable way to get parent and childname
-          const [parentName, childName] = metadataResult.fullName.split(".");
-          props = {
-            type: parentType,
-            name: parentName,
-            xml: `${parentType.directoryName}/${parentName}.${parentType.suffix}`,
-          };
-          metadataResult.fullName = childName;
-          obj = Object.fromEntries([
-            [
-              parentType.name,
-              Object.fromEntries([[mdType.directoryName, metadataResult]]),
-            ],
-          ]);
-        } else {
-          props = {
-            type: mdType,
-            name: metadataResult.fullName,
-            xml: `${mdType.directoryName}/${metadataResult.fullName}.${mdType.suffix}`,
-          };
-          obj = Object.fromEntries([[typeName, metadataResult]]);
-        }
-        const stream = new JsToXml(obj);
-        const zipBuffer = new ZipWriter();
-        zipBuffer.addToZip(stream, props.xml);
-        await zipBuffer._final((err?) => {
-          if (err) {
-            console.error(err);
-          }
-        });
-        const zipTreeContainer = await ZipTreeContainer.create(
-          zipBuffer.buffer
+
+        const component = await convertMetadataToComponent(
+          result,
+          mdType,
+          parentType
         );
-        result.add(new SourceComponent(props, zipTreeContainer));
+        resultSet.add(component);
       }
     }
   }
-  return result;
+
+  return resultSet;
+}
+
+async function fetchMetadataFromOrg(
+  connection: Connection,
+  typeName: string,
+  memberNames: string[]
+): Promise<any[]> {
+  const qualifiedNames = memberNames.map((name) => `${typeName}:${name}`);
+  console.log("reading", qualifiedNames.join(", "), "...");
+  return await connection.metadata.read(
+    typeName as MetadataTypeName,
+    memberNames
+  );
+}
+
+function determineMaxChunkSize(typeName: MetadataTypeName): number {
+  // https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm
+  // > Limit: 10. (For CustomMetadata and CustomApplication only, the limit is 200.)
+  const MAX_CHUNK_SIZE = 10;
+  const MAX_CHUNK_SIZE_SPECIAL_TYPES = 200;
+  const SPECIAL_TYPES = ["CustomApplication", "CustomMetadata"];
+  return SPECIAL_TYPES.includes(typeName)
+    ? MAX_CHUNK_SIZE_SPECIAL_TYPES
+    : MAX_CHUNK_SIZE;
+}
+
+async function createZipContainer(
+  xmlStream: JsToXml,
+  xmlPath: string
+): Promise<ZipTreeContainer> {
+  const zipWriter = new ZipWriter();
+  zipWriter.addToZip(xmlStream, xmlPath);
+  await new Promise<void>((resolve, reject) => {
+    zipWriter._final((err?) => {
+      if (err) {
+        console.error(err);
+        reject(err);
+      }
+      resolve();
+    });
+  });
+  return ZipTreeContainer.create(zipWriter.buffer);
+}
+
+async function convertMetadataToComponent(
+  metadataResult: any,
+  mdType: MetadataType,
+  parentType: MetadataType | null
+): Promise<SourceComponent> {
+  // TODO: more reliable way to get parent and childname
+  const [parentName, childName] = (metadataResult.fullName || "").split(".");
+  const componentType = parentType || mdType;
+  const componentName = parentType ? parentName : metadataResult.fullName;
+
+  const componentProps = {
+    type: componentType,
+    name: componentName,
+    xml: `${componentType.directoryName}/${componentName}.${componentType.suffix}`,
+  };
+
+  const metadataObj = parentType
+    ? {
+        [parentType.name]: {
+          [mdType.directoryName]: { ...metadataResult, fullName: childName },
+        },
+      }
+    : { [mdType.name]: metadataResult };
+
+  const xmlStream = new JsToXml(metadataObj);
+  const zipContainer = await createZipContainer(xmlStream, componentProps.xml);
+
+  return new SourceComponent(componentProps, zipContainer);
 }
