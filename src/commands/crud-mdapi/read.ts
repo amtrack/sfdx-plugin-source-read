@@ -27,13 +27,13 @@ export class CrudMdapiRead extends SfCommand<unknown> {
       multiple: true,
       exclusive: ["manifest", "source-dir"],
     }),
-    // manifest: Flags.file({
-    //   char: "x",
-    //   summary:
-    //     "File path for the manifest (package.xml) that specifies the components to read.",
-    //   exclusive: ["metadata", "source-dir"],
-    //   exists: true,
-    // }),
+    manifest: Flags.file({
+      char: "x",
+      summary:
+        "File path for the manifest (package.xml) that specifies the components to read.",
+      exclusive: ["metadata", "source-dir"],
+      exists: true,
+    }),
     "source-dir": Flags.string({
       char: "d",
       summary: `File paths for source to read from the org.`,
@@ -61,6 +61,18 @@ export class CrudMdapiRead extends SfCommand<unknown> {
 
     const componentSet = await ComponentSetBuilder.build({
       sourcepath: flags["source-dir"],
+      ...(flags.manifest
+        ? {
+            manifest: {
+              manifestPath: flags.manifest,
+              directoryPaths: flags["output-dir"]
+                ? []
+                : this.project
+                    .getUniquePackageDirectories()
+                    .map((dir) => dir.fullPath),
+            },
+          }
+        : {}),
       ...(flags.metadata
         ? {
             metadata: {
