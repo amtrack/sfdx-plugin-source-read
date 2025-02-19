@@ -9,7 +9,7 @@ import { readComponentSetFromOrg } from "../../index.js";
 export class CrudMdapiRead extends SfCommand<unknown> {
   public static readonly summary = "Read Metadata using the CRUD Metadata API";
   public static readonly description =
-    "Read Metadata e.g. full Profiles using the CRUD Metadata API";
+    "Read Metadata e.g. full Profiles using the CRUD Metadata API, convert the JSON result to XML and write as source format to disk.";
 
   public static readonly examples = [
     `$ <%= config.bin %> <%= command.id %> --metadata "Profile:Admin"`,
@@ -56,9 +56,10 @@ export class CrudMdapiRead extends SfCommand<unknown> {
 
   public static readonly requiresProject = true;
 
-  public async run(): Promise<any> {
+  public async run(): Promise<unknown> {
     const { flags } = await this.parse(CrudMdapiRead);
 
+    // 1/4 build a ComponentSet from the flags
     const componentSet = await ComponentSetBuilder.build({
       sourcepath: flags["source-dir"],
       ...(flags.manifest
@@ -86,6 +87,8 @@ export class CrudMdapiRead extends SfCommand<unknown> {
           }
         : {}),
     });
+
+    // 2/4 read the components from the org to a new ComponentSet
     const connection = flags["target-org"].getConnection();
     const readComponentSet = await readComponentSetFromOrg(
       componentSet,
@@ -93,6 +96,7 @@ export class CrudMdapiRead extends SfCommand<unknown> {
       flags["chunk-size"]
     );
 
+    // 3/4 write the components of the ComponentSet to disk
     const outputConfig: ConvertOutputConfig = {
       type: "merge",
       mergeWith: [],
@@ -105,15 +109,28 @@ export class CrudMdapiRead extends SfCommand<unknown> {
       outputConfig
     );
 
-    console.log("Read Source");
-    console.table([
+    // 4/4 display the written files
+    const files = [
       ...new Set(
         convertResult.converted.map((c) => ({
-          Name: c.fullName,
-          Type: c.type.name,
-          Path: c.xml,
+          fullName: c.fullName,
+          type: c.type.name,
+          filePath: c.xml,
         }))
       ),
-    ]);
+    ];
+    this.styledHeader("Read Source");
+    this.table({
+      data: files,
+      columns: [
+        { name: "Name", key: "fullName" },
+        { name: "Type", key: "type" },
+        { name: "Path", key: "filePath" },
+      ],
+    });
+    return {
+      success: true,
+      files,
+    };
   }
 }

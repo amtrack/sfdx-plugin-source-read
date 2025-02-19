@@ -1,8 +1,10 @@
-import type { MetadataType as MetadataTypeName } from "@jsforce/jsforce-node/lib/api/metadata.js";
+import type {
+  Metadata,
+  MetadataType as MetadataTypeName,
+} from "@jsforce/jsforce-node/lib/api/metadata.js";
 import { SfProject, type Connection } from "@salesforce/core";
 import {
   ComponentSet,
-  MetadataType,
   RegistryAccess,
   SourceComponent,
   ZipTreeContainer,
@@ -23,10 +25,6 @@ export async function readComponentSetFromOrg(
   connection: Connection,
   maxChunkSize?: number
 ): Promise<ComponentSet> {
-  const registry = new RegistryAccess(
-    undefined,
-    SfProject.getInstance()?.getPath()
-  );
   const componentsByType = groupBy(
     componentSet.toArray(),
     (cmp) => cmp.type.name
@@ -34,8 +32,6 @@ export async function readComponentSetFromOrg(
   const resultSet = new ComponentSet();
 
   for (const [typeName, components] of Object.entries(componentsByType)) {
-    const mdType = registry.getTypeByName(typeName);
-    const parentType = registry.getParentType(typeName);
     const memberNames = components.map((cmp) => cmp.fullName);
     const chunkSize =
       maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
@@ -46,18 +42,15 @@ export async function readComponentSetFromOrg(
         typeName,
         memberNameChunk
       );
-
       for (const [index, result] of metadataResults.entries()) {
         if (!result?.fullName) {
           throw new Error(
             `Failed to retrieve ${typeName}:${memberNameChunk[index]}`
           );
         }
-
-        const component = await convertMetadataToComponent(
-          result,
-          mdType,
-          parentType
+        const component = await convertMetadataToSourceComponent(
+          typeName,
+          result
         );
         resultSet.add(component);
       }
@@ -71,18 +64,26 @@ async function fetchMetadataFromOrg(
   connection: Connection,
   typeName: string,
   memberNames: string[]
-): Promise<any[]> {
+) {
   const qualifiedNames = memberNames.map((name) => `${typeName}:${name}`);
-  console.log("reading", qualifiedNames.join(", "), "...");
+  console.error("reading", qualifiedNames.join(", "), "...");
   return await connection.metadata.read(
     typeName as MetadataTypeName,
     memberNames
   );
 }
 
+/**
+ * Determine the maximum number of members that can be read in a single call
+ * using the CRUD-based Metadata API according to the Salesforce documentation.
+ *
+ *  > Limit: 10. (For CustomMetadata and CustomApplication only, the limit is 200.)
+ *
+ * Source: https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm
+ * @param typeName The MetadataType name
+ * @returns The maximum number of members that can be read in a single call
+ */
 function determineMaxChunkSize(typeName: MetadataTypeName): number {
-  // https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm
-  // > Limit: 10. (For CustomMetadata and CustomApplication only, the limit is 200.)
   const MAX_CHUNK_SIZE = 10;
   const MAX_CHUNK_SIZE_SPECIAL_TYPES = 200;
   const SPECIAL_TYPES = ["CustomApplication", "CustomMetadata"];
@@ -109,12 +110,17 @@ async function createZipContainer(
   return ZipTreeContainer.create(zipWriter.buffer);
 }
 
-async function convertMetadataToComponent(
-  metadataResult: any,
-  mdType: MetadataType,
-  parentType: MetadataType | null
+async function convertMetadataToSourceComponent(
+  typeName: string,
+  metadataResult: Metadata
 ): Promise<SourceComponent> {
-  // TODO: more reliable way to get parent and childname
+  const registry = new RegistryAccess(
+    undefined,
+    SfProject.getInstance()?.getPath()
+  );
+  const mdType = registry.getTypeByName(typeName);
+  const parentType = registry.getParentType(mdType.name);
+  // Is there a more reliable way to get parentName and childName?
   const [parentName, childName] = (metadataResult.fullName || "").split(".");
   const componentType = parentType || mdType;
   const componentName = parentType ? parentName : metadataResult.fullName;
