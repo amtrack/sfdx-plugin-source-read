@@ -2,9 +2,10 @@ import type {
   Metadata,
   MetadataType as MetadataTypeName,
 } from "@jsforce/jsforce-node/lib/api/metadata.js";
-import { SfProject, type Connection } from "@salesforce/core";
+import { type Connection } from "@salesforce/core";
 import {
   ComponentSet,
+  type MetadataComponent,
   RegistryAccess,
   SourceComponent,
   ZipTreeContainer,
@@ -30,27 +31,49 @@ export async function readComponentSetFromOrg(
     (cmp) => cmp.type.name
   );
   const resultSet = new ComponentSet();
+  const registry = new RegistryAccess();
 
-  for (const [typeName, components] of Object.entries(componentsByType)) {
-    const memberNames = components.map((cmp) => cmp.fullName);
+  for (const [typeName, metadataComponents] of Object.entries(
+    componentsByType
+  )) {
+    const parentType = registry.getParentType(typeName);
+    const metadataComponentsWithParents = !parentType
+      ? metadataComponents
+      : metadataComponents.map((mc) => {
+          if (mc.parent) {
+            return mc;
+          }
+          return {
+            ...mc,
+            parent: {
+              // Is there a more reliable way to get parentName?
+              fullName: mc.fullName.split(".")[0],
+              type: parentType,
+            },
+          };
+        });
     const chunkSize =
       maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
 
-    for (const memberNameChunk of chunk(memberNames, chunkSize)) {
+    for (const chunkOfComponents of chunk(
+      metadataComponentsWithParents,
+      chunkSize
+    )) {
       const metadataResults = await fetchMetadataFromOrg(
         connection,
         typeName,
-        memberNameChunk
+        chunkOfComponents.map((cmp) => cmp.fullName)
       );
-      for (const [index, result] of metadataResults.entries()) {
-        if (!result?.fullName) {
+      for (const [index, metadataResult] of metadataResults.entries()) {
+        const metadataComponent = metadataComponentsWithParents[index];
+        if (!metadataResult?.fullName) {
           throw new Error(
-            `Failed to retrieve ${typeName}:${memberNameChunk[index]}`
+            `Failed to retrieve ${metadataComponent.type.name}:${metadataComponent.fullName}`
           );
         }
-        const component = await convertMetadataToSourceComponent(
-          typeName,
-          result
+        const component = await convertToSourceComponent(
+          metadataComponent,
+          metadataResult
         );
         resultSet.add(component);
       }
@@ -110,34 +133,46 @@ async function createZipContainer(
   return ZipTreeContainer.create(zipWriter.buffer);
 }
 
-async function convertMetadataToSourceComponent(
-  typeName: string,
+/**
+ * Creates a SourceComponent with zipped content in Metadata format.
+ * @param metadataComponent A MetadataComponent with parent if it has one
+ * @param metadataResult The raw response of connection.metadata.read()
+ * @returns SourceComponent with zipped content in Metadata format
+ */
+export async function convertToSourceComponent(
+  metadataComponent: MetadataComponent,
   metadataResult: Metadata
 ): Promise<SourceComponent> {
-  const registry = new RegistryAccess(
-    undefined,
-    SfProject.getInstance()?.getPath()
-  );
-  const mdType = registry.getTypeByName(typeName);
-  const parentType = registry.getParentType(mdType.name);
-  // Is there a more reliable way to get parentName and childName?
-  const [parentName, childName] = (metadataResult.fullName || "").split(".");
-  const componentType = parentType || mdType;
-  const componentName = parentType ? parentName : metadataResult.fullName;
-
-  const componentProps = {
-    type: componentType,
-    name: componentName,
-    xml: `${componentType.directoryName}/${componentName}.${componentType.suffix}`,
-  };
-
-  const metadataObj = parentType
-    ? {
-        [parentType.name]: {
-          [mdType.directoryName]: { ...metadataResult, fullName: childName },
+  let metadataObj, componentProps;
+  if (!metadataComponent.parent) {
+    componentProps = {
+      type: metadataComponent.type,
+      name: metadataComponent.fullName,
+      xml: `${metadataComponent.type.directoryName}/${metadataComponent.fullName}.${metadataComponent.type.suffix}`,
+    };
+    metadataObj = { [metadataComponent.type.name]: metadataResult };
+  } else {
+    componentProps = {
+      type: metadataComponent.parent.type,
+      name: metadataComponent.parent.fullName,
+      xml: `${metadataComponent.parent.type.directoryName}/${metadataComponent.parent.fullName}.${metadataComponent.parent.type.suffix}`,
+    };
+    // TODO: Is there a more reliable way to get childName?
+    const [_, childName] = metadataComponent.fullName.split(".");
+    if (!childName) {
+      throw new Error(
+        `Failed to guess component child name for ${metadataComponent.type.name}:${metadataComponent.fullName}.`
+      );
+    }
+    metadataObj = {
+      [metadataComponent.parent.type.name]: {
+        [metadataComponent.type.directoryName]: {
+          ...metadataResult,
+          fullName: childName,
         },
-      }
-    : { [mdType.name]: metadataResult };
+      },
+    };
+  }
 
   const xmlStream = new JsToXml(metadataObj);
   const zipContainer = await createZipContainer(xmlStream, componentProps.xml);
