@@ -16,11 +16,6 @@ import {
 } from "@salesforce/source-deploy-retrieve/lib/src/convert/streams.js";
 import { chunk, groupBy } from "./utils.js";
 
-export type ReadOptions = {
-  defaultPackageDirectory: string;
-  outputDirectory?: string;
-};
-
 export async function readComponentSetFromOrg(
   componentSet: ComponentSet,
   connection: Connection,
