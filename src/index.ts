@@ -60,7 +60,7 @@ export async function readComponentSetFromOrg(
         chunkOfComponents.map((cmp) => cmp.fullName)
       );
       for (const [index, metadataResult] of metadataResults.entries()) {
-        const metadataComponent = metadataComponentsWithParents[index];
+        const metadataComponent = chunkOfComponents[index];
         if (!metadataResult?.fullName) {
           throw new Error(
             `Failed to retrieve ${metadataComponent.type.name}:${metadataComponent.fullName}`
