@@ -1,3 +1,4 @@
+import type { MetadataType as MetadataTypeName } from "@jsforce/jsforce-node/lib/api/metadata.js";
 import { Builder } from "xml2js";
 
 export function parseCommaSeparatedValues(
@@ -58,4 +59,23 @@ export function groupBy<T>(
     (acc[predicate(value, index, array)] ||= []).push(value);
     return acc;
   }, {} as { [key: string]: T[] });
+}
+
+/**
+ * Determine the maximum number of members that can be read in a single call
+ * using the CRUD-based Metadata API according to the Salesforce documentation.
+ *
+ *  > Limit: 10. (For CustomMetadata and CustomApplication only, the limit is 200.)
+ *
+ * Source: https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm
+ * @param typeName The MetadataType name
+ * @returns The maximum number of members that can be read in a single call
+ */
+export function determineMaxChunkSize(typeName: MetadataTypeName): number {
+  const MAX_CHUNK_SIZE = 10;
+  const MAX_CHUNK_SIZE_SPECIAL_TYPES = 200;
+  const SPECIAL_TYPES = ["CustomApplication", "CustomMetadata"];
+  return SPECIAL_TYPES.includes(typeName)
+    ? MAX_CHUNK_SIZE_SPECIAL_TYPES
+    : MAX_CHUNK_SIZE;
 }

@@ -1,9 +1,7 @@
 import { Flags, SfCommand } from "@salesforce/sf-plugins-core";
-import {
-  ComponentSetBuilder,
-  MetadataConverter,
-} from "@salesforce/source-deploy-retrieve";
-import { readComponentSetFromOrg } from "../../index.js";
+import { ComponentSetBuilder } from "@salesforce/source-deploy-retrieve";
+import { readFromOrg } from "../../component-set.js";
+import { writeComponentSetToDisk } from "../../component-set.js";
 
 export class CrudMdapiRead extends SfCommand<unknown> {
   public static readonly summary = "Read Metadata using the CRUD Metadata API";
@@ -89,31 +87,19 @@ export class CrudMdapiRead extends SfCommand<unknown> {
 
     // 2/4 read the components from the org to a new ComponentSet
     const connection = flags["target-org"].getConnection();
-    const readComponentSet = await readComponentSetFromOrg(
+    const readComponentSet = await readFromOrg(
       componentSet,
       connection,
       flags["chunk-size"]
     );
 
     // 3/4 write the components of the ComponentSet to disk
-    const convertResult = await new MetadataConverter().convert(
+    const files = await writeComponentSetToDisk(
       readComponentSet,
-      "source",
-      {
-        type: "merge",
-        mergeWith: [],
-        // mergeWith: componentSet,
-        defaultDirectory:
-          flags["output-dir"] ?? this.project.getDefaultPackage().path,
-      }
+      flags["output-dir"] ?? this.project.getDefaultPackage().path
     );
 
     // 4/4 display the written files
-    const files = convertResult.converted.map((c) => ({
-      fullName: c.fullName,
-      type: c.type.name,
-      filePath: c.xml,
-    }));
     this.styledHeader("Read Source");
     this.table({
       data: files,
