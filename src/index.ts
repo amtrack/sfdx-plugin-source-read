@@ -32,21 +32,10 @@ export async function readComponentSetFromOrg(
     componentsByType
   )) {
     const parentType = registry.getParentType(typeName);
-    const metadataComponentsWithParents = !parentType
-      ? metadataComponents
-      : metadataComponents.map((mc) => {
-          if (mc.parent) {
-            return mc;
-          }
-          return {
-            ...mc,
-            parent: {
-              // Is there a more reliable way to get parentName?
-              fullName: mc.fullName.split(".")[0],
-              type: parentType,
-            },
-          };
-        });
+    const metadataComponentsWithParents = addFakeParentToMetadataComponents(
+      parentType,
+      metadataComponents
+    );
     const chunkSize =
       maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
 
@@ -76,6 +65,27 @@ export async function readComponentSetFromOrg(
   }
 
   return resultSet;
+}
+
+function addFakeParentToMetadataComponents(
+  parentType,
+  metadataComponents: MetadataComponent[]
+) {
+  return !parentType
+    ? metadataComponents
+    : metadataComponents.map((mc) => {
+        if (mc.parent) {
+          return mc;
+        }
+        return {
+          ...mc,
+          parent: {
+            // Is there a more reliable way to get parentName?
+            fullName: mc.fullName.split(".")[0],
+            type: parentType,
+          },
+        };
+      });
 }
 
 async function fetchMetadataFromOrg(
