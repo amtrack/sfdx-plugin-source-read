@@ -9,7 +9,7 @@
     "sfdx-plugin-source-read": "bin/run"
   },
   "dependencies": {
-    "@salesforce/sf-plugins-core": "12.1.3",
+    "@salesforce/sf-plugins-core": "12.2.0",
     "@salesforce/source-deploy-retrieve": "12.14.1"
   },
   "devDependencies": {
