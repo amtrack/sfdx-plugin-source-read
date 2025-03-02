@@ -31,7 +31,7 @@ describe("ComponentSet", () => {
             "./tmp",
             "main",
             "default",
-            "objecttranslations",
+            "objectTranslations",
             "Dummy__c-en_US",
             "Dummy__c-en_US.objectTranslation-meta.xml"
           ),
@@ -44,7 +44,7 @@ describe("ComponentSet", () => {
             "./tmp",
             "main",
             "default",
-            "objecttranslations",
+            "objectTranslations",
             "Dummy__c-en_US",
             "Type__c.fieldTranslation-meta.xml"
           ),
