@@ -9,13 +9,13 @@
     "sfdx-plugin-source-read": "bin/run.js"
   },
   "dependencies": {
-    "@salesforce/sf-plugins-core": "12.1.3",
-    "@salesforce/source-deploy-retrieve": "12.14.1"
+    "@salesforce/sf-plugins-core": "12.2.0",
+    "@salesforce/source-deploy-retrieve": "12.16.2"
   },
   "devDependencies": {
-    "@salesforce/dev-scripts": "10.2.11",
+    "@salesforce/dev-scripts": "10.2.12",
     "execa": "9.5.2",
-    "oclif": "4.17.25"
+    "oclif": "4.17.34"
   },
   "exports": "./lib/index.js",
   "files": [
