@@ -11,7 +11,11 @@ import {
 import { filePathsFromMetadataComponent } from "@salesforce/source-deploy-retrieve/lib/src/utils/filePathGenerator.js";
 import { mkdir, writeFile } from "fs/promises";
 import { dirname, join } from "path";
-import { convertToXml, parseCommaSeparatedValues } from "../../../utils.js";
+import {
+  chunk,
+  convertToXml,
+  parseCommaSeparatedValues,
+} from "../../../utils.js";
 
 export class SourceReadCommand extends SfCommand<any> {
   public static readonly summary = "Read Metadata using the CRUD Metadata API";
@@ -111,11 +115,3 @@ export class SourceReadCommand extends SfCommand<any> {
     return;
   }
 }
-
-const chunk = (input, size) => {
-  return input.reduce((arr, item, idx) => {
-    return idx % size === 0
-      ? [...arr, [item]]
-      : [...arr.slice(0, -1), [...arr.slice(-1)[0], item]];
-  }, []);
-};
