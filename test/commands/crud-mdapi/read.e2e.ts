@@ -101,7 +101,7 @@ describe("crud-mdapi read", () => {
     });
     it("reads a RecordType with Picklist values", async () => {
       await run(
-        `crud-mdapi read --metadata RecordType:DummyWithRT__c.DummyRecordType`
+        `crud-mdapi read --metadata RecordType:DummyWithRT__c.DummyRecordType --metadata RecordType:DummyWithRT__c.DummyRecordType2`
       );
       const lines = readFileSync(
         join(
@@ -114,6 +114,17 @@ describe("crud-mdapi read", () => {
         "utf8"
       ).split("\n");
       expect(lines).to.contain(`        <picklist>Type__c</picklist>`);
+      const lines2 = readFileSync(
+        join(
+          DEFAULT_PACKAGE_DIR,
+          "objects",
+          "DummyWithRT__c",
+          "recordTypes",
+          "DummyRecordType2.recordType-meta.xml"
+        ),
+        "utf8"
+      ).split("\n");
+      expect(lines2).to.contain(`        <picklist>Type__c</picklist>`);
     });
     after("delete", async function () {
       this.timeout(300 * 1000);
