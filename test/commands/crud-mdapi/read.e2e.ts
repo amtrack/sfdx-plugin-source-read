@@ -22,16 +22,17 @@ describe("crud-mdapi read", () => {
       await run(
         `crud-mdapi read --metadata CustomObjectTranslation:Dummy__c-en_US`
       );
-      const lines = readFileSync(
-        join(
-          DEFAULT_PACKAGE_DIR,
-          "objectTranslations",
-          "Dummy__c-en_US",
-          "Type__c.fieldTranslation-meta.xml"
-        ),
-        "utf8"
-      ).split("\n");
-      expect(lines).to.contain(`    <help>TEST help text</help>`);
+      expect(
+        readFileSync(
+          join(
+            DEFAULT_PACKAGE_DIR,
+            "objectTranslations",
+            "Dummy__c-en_US",
+            "Type__c.fieldTranslation-meta.xml"
+          ),
+          "utf8"
+        ).split("\n")
+      ).to.contain(`    <help>TEST help text</help>`);
     });
     after("delete", async function () {
       this.timeout(300 * 1000);
@@ -103,28 +104,30 @@ describe("crud-mdapi read", () => {
       await run(
         `crud-mdapi read --metadata RecordType:DummyWithRT__c.DummyRecordType --metadata RecordType:DummyWithRT__c.DummyRecordType2`
       );
-      const lines = readFileSync(
-        join(
-          DEFAULT_PACKAGE_DIR,
-          "objects",
-          "DummyWithRT__c",
-          "recordTypes",
-          "DummyRecordType.recordType-meta.xml"
-        ),
-        "utf8"
-      ).split("\n");
-      expect(lines).to.contain(`        <picklist>Type__c</picklist>`);
-      const lines2 = readFileSync(
-        join(
-          DEFAULT_PACKAGE_DIR,
-          "objects",
-          "DummyWithRT__c",
-          "recordTypes",
-          "DummyRecordType2.recordType-meta.xml"
-        ),
-        "utf8"
-      ).split("\n");
-      expect(lines2).to.contain(`        <picklist>Type__c</picklist>`);
+      expect(
+        readFileSync(
+          join(
+            DEFAULT_PACKAGE_DIR,
+            "objects",
+            "DummyWithRT__c",
+            "recordTypes",
+            "DummyRecordType.recordType-meta.xml"
+          ),
+          "utf8"
+        ).split("\n")
+      ).to.contain(`        <picklist>Type__c</picklist>`);
+      expect(
+        readFileSync(
+          join(
+            DEFAULT_PACKAGE_DIR,
+            "objects",
+            "DummyWithRT__c",
+            "recordTypes",
+            "DummyRecordType2.recordType-meta.xml"
+          ),
+          "utf8"
+        ).split("\n")
+      ).to.contain(`        <picklist>Type__c</picklist>`);
     });
     after("delete", async function () {
       this.timeout(300 * 1000);
@@ -158,17 +161,18 @@ describe("crud-mdapi read", () => {
       await run(
         `crud-mdapi read --metadata Translations:en_US --output-dir tmp`
       );
-      const lines = readFileSync(
-        join(
-          "tmp",
-          "main",
-          "default",
-          "translations",
-          "en_US.translation-meta.xml"
-        ),
-        "utf8"
-      ).split("\n");
-      expect(lines).to.contain(`        <label>Hello</label>`);
+      expect(
+        readFileSync(
+          join(
+            "tmp",
+            "main",
+            "default",
+            "translations",
+            "en_US.translation-meta.xml"
+          ),
+          "utf8"
+        ).split("\n")
+      ).to.contain(`        <label>Hello</label>`);
     });
     after("delete", async function () {
       this.timeout(300 * 1000);

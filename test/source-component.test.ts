@@ -12,7 +12,7 @@ import {
 
 describe("SourceComponent", () => {
   describe("createSourceComponentWithMetadata", () => {
-    it("CustomObject", async () => {
+    it("standalone CustomObject", async () => {
       const sourceComponent = await createSourceComponentWithMetadata(
         customObjectMetadataComponent,
         customObject
@@ -25,7 +25,7 @@ describe("SourceComponent", () => {
       );
     });
 
-    it("CustomField", async () => {
+    it("CustomField with auto-inferred parent", async () => {
       const sourceComponent = await createSourceComponentWithMetadata(
         customFieldMetadataComponent,
         customField
@@ -58,6 +58,11 @@ describe("SourceComponent", () => {
         "objects/Account/fields/Industry.field"
       );
       expect(adjustedSourceComponent.parent).to.have.property("xml", undefined);
+      // original source component is unchanged
+      expect(sourceComponent).to.have.property(
+        "xml",
+        "objects/Account/fields/Industry.field-meta.xml"
+      );
     });
   });
 });
