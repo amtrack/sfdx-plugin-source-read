@@ -99,7 +99,7 @@ export class CrudMdapiRead extends SfCommand<unknown> {
       flags["output-dir"] ?? this.project.getDefaultPackage().path
     );
 
-    // 4/4 display the written files
+    // 4/4 print the result: type, name and file path
     this.styledHeader("Read Source");
     this.table({
       data: files,
