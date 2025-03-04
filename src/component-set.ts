@@ -7,8 +7,11 @@ import {
   type MetadataComponent,
 } from "@salesforce/source-deploy-retrieve";
 import { fetchMetadataFromOrg } from "./crud-mdapi.js";
-import { createSourceComponentWithMetadata } from "./source-component.js";
-import { groupBy, determineMaxChunkSize, chunk } from "./utils.js";
+import {
+  cloneSourceComponent,
+  createSourceComponentWithMetadata,
+} from "./source-component.js";
+import { chunk, determineMaxChunkSize, groupBy } from "./utils.js";
 
 type File = { type: string; fullName: string; filePath: string };
 
@@ -21,8 +24,16 @@ export async function writeComponentSetToDisk(
   // - Profile: Standard.profile-meta EmailServicesFunction force-app/main/default/profiles/Standard.profile-meta.xml-meta.xml
   // - Translation: de.translation-meta EmailServicesFunction foo/main/default/translations/de.translation-meta.xml-meta.xml
   // Workaround: make sure file paths don't end with -meta.xml
+  const tempComponentSet = new ComponentSet();
+  for (const sourceComponent of componentSet.getSourceComponents()) {
+    tempComponentSet.add(
+      await cloneSourceComponent(sourceComponent, (filePath) =>
+        filePath.replace("-meta.xml", "")
+      )
+    );
+  }
   const convertResult = await new MetadataConverter().convert(
-    componentSet,
+    tempComponentSet,
     "source",
     {
       type: "merge",
@@ -37,6 +48,7 @@ export async function writeComponentSetToDisk(
   }));
   return files;
 }
+
 export async function readFromOrg(
   componentSet: ComponentSet,
   connection: Connection,
@@ -87,6 +99,7 @@ export async function readFromOrg(
 
   return resultSet;
 }
+
 export function addFakeParentToMetadataComponents(
   parentType,
   metadataComponents: MetadataComponent[]

@@ -1,5 +1,8 @@
 import { expect } from "chai";
-import { createSourceComponentWithMetadata } from "../src/source-component.js";
+import {
+  cloneSourceComponent,
+  createSourceComponentWithMetadata,
+} from "../src/source-component.js";
 import {
   customField,
   customFieldMetadataComponent,
@@ -16,10 +19,9 @@ describe("SourceComponent", () => {
       );
       expect(sourceComponent).to.have.property("fullName", "Account");
       expect(sourceComponent.type).to.have.property("name", "CustomObject");
-      // workaround: remove "-meta.xml" to make source-to-source conversion work
       expect(sourceComponent).to.have.property(
         "xml",
-        "objects/Account/Account.object"
+        "objects/Account/Account.object-meta.xml"
       );
     });
 
@@ -30,13 +32,32 @@ describe("SourceComponent", () => {
       );
       expect(sourceComponent).to.have.property("fullName", "Account.Industry");
       expect(sourceComponent.type).to.have.property("name", "CustomField");
-      // workaround: remove "-meta.xml" to make source-to-source conversion work
       expect(sourceComponent).to.have.property(
         "xml",
-        "objects/Account/fields/Industry.field"
+        "objects/Account/fields/Industry.field-meta.xml"
       );
       expect(sourceComponent).to.have.property("parent");
       expect(sourceComponent.parent).to.have.property("fullName", "Account");
+      // fake source component doesn't have xml and tree
+      expect(sourceComponent.parent).to.have.property("xml", undefined);
+    });
+  });
+
+  describe("cloneSourceComponent", () => {
+    it("removes -meta.xml", async () => {
+      const sourceComponent = await createSourceComponentWithMetadata(
+        customFieldMetadataComponent,
+        customField
+      );
+      const adjustedSourceComponent = await cloneSourceComponent(
+        sourceComponent,
+        (filePath) => filePath.replace("-meta.xml", "")
+      );
+      expect(adjustedSourceComponent).to.have.property(
+        "xml",
+        "objects/Account/fields/Industry.field"
+      );
+      expect(adjustedSourceComponent.parent).to.have.property("xml", undefined);
     });
   });
 });
