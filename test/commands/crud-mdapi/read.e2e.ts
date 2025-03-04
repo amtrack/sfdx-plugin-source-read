@@ -88,7 +88,7 @@ describe("crud-mdapi read", () => {
     });
   });
 
-  describe("RecordType with Picklist values", async () => {
+  describe("RecordTypes with Picklist values", async () => {
     before("deploy", async function () {
       this.timeout(300 * 1000);
       await execa("sf", [
@@ -99,7 +99,7 @@ describe("crud-mdapi read", () => {
         join("sfdx-source", "recordtypes-with-picklistvalues"),
       ]);
     });
-    it("reads a RecordType with Picklist values", async () => {
+    it("reads RecordTypes with Picklist values", async () => {
       await run(
         `crud-mdapi read --metadata RecordType:DummyWithRT__c.DummyRecordType --metadata RecordType:DummyWithRT__c.DummyRecordType2`
       );
