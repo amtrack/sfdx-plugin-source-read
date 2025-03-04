@@ -38,7 +38,7 @@ describe("SourceComponent", () => {
       );
       expect(sourceComponent).to.have.property("parent");
       expect(sourceComponent.parent).to.have.property("fullName", "Account");
-      // fake source component doesn't have xml and tree
+      // fake source components don't have xml and tree
       expect(sourceComponent.parent).to.have.property("xml", undefined);
     });
   });

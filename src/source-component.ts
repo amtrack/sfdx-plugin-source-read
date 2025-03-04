@@ -34,9 +34,6 @@ export async function createSourceComponentWithMetadata(
     componentProps.parent = new SourceComponent({
       type: metadataComponent.parent.type,
       name: metadataComponent.parent.fullName,
-      // xml: filePaths.find((p) =>
-      //   p.endsWith(`.${metadataComponent.parent.type.suffix}-meta.xml`)
-      // ),
     });
     // Is there a more reliable way to get childName?
     componentProps.name = componentProps.name.split(".")?.[1];
