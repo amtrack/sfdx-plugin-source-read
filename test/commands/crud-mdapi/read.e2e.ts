@@ -143,7 +143,7 @@ describe("crud-mdapi read", () => {
     });
   });
 
-  describe("Translations with CustomLabels", async () => {
+  describe("Translations with CustomLabels with --output-dir", async () => {
     before("deploy", async function () {
       this.timeout(300 * 1000);
       await execa("sf", [
@@ -155,9 +155,17 @@ describe("crud-mdapi read", () => {
       ]);
     });
     it("reads Translations with CustomLabels", async () => {
-      await run(`crud-mdapi read --metadata Translations:en_US`);
+      await run(
+        `crud-mdapi read --metadata Translations:en_US --output-dir tmp`
+      );
       const lines = readFileSync(
-        join(DEFAULT_PACKAGE_DIR, "translations", "en_US.translation-meta.xml"),
+        join(
+          "tmp",
+          "main",
+          "default",
+          "translations",
+          "en_US.translation-meta.xml"
+        ),
         "utf8"
       ).split("\n");
       expect(lines).to.contain(`        <label>Hello</label>`);
@@ -172,6 +180,9 @@ describe("crud-mdapi read", () => {
         "--metadata",
         "CustomLabel:Greeting",
       ]);
+      rmSync("tmp", {
+        recursive: true,
+      });
     });
   });
 });
