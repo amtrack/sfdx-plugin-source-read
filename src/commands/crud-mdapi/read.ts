@@ -20,7 +20,7 @@ export class CrudMdapiRead extends SfCommand<unknown> {
     metadata: Flags.string({
       char: "m",
       summary: `Metadata component names to read.`,
-      description: `Examples: 'RecordType:Account.Business', 'Profile:Admin'`,
+      description: `Example values: 'RecordType:Account.Business', 'Profile:Admin'`,
       multiple: true,
       exclusive: ["manifest", "source-dir"],
     }),
@@ -34,7 +34,7 @@ export class CrudMdapiRead extends SfCommand<unknown> {
     "source-dir": Flags.string({
       char: "d",
       summary: `File paths for source to read from the org.`,
-      description: `Examples: 'force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml', 'force-app/main/default/profiles/Admin.profile-meta.xml'`,
+      description: `Example values: 'force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml', 'force-app/main/default/profiles/Admin.profile-meta.xml'`,
       multiple: true,
       exclusive: ["manifest", "metadata"],
     }),
