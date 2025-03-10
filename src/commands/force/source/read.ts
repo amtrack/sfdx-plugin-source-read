@@ -18,6 +18,11 @@ import {
 } from "../../../utils.js";
 
 export class SourceReadCommand extends SfCommand<any> {
+  public static state = "deprecated";
+  public static deprecationOptions = {
+    message: `The 'sf force source read' command is deprecated and will be removed in the next major version.
+Please migrate to 'sf crud-mdapi read': https://github.com/amtrack/sfdx-plugin-source-read/wiki/Migration#sf-crud-mdapi-read`,
+  };
   public static readonly summary = "Read Metadata using the CRUD Metadata API";
   public static readonly description =
     "Read Metadata e.g. full Profiles using the CRUD Metadata API";
