@@ -6,17 +6,18 @@
   "bugs": "https://github.com/amtrack/sfdx-plugin-source-read/issues",
   "type": "module",
   "bin": {
-    "sfdx-plugin-source-read": "bin/run"
+    "sfdx-plugin-source-read": "bin/run.js"
   },
   "dependencies": {
-    "@salesforce/sf-plugins-core": "12.1.3",
-    "@salesforce/source-deploy-retrieve": "12.14.1"
+    "@salesforce/sf-plugins-core": "12.2.0",
+    "@salesforce/source-deploy-retrieve": "12.16.5"
   },
   "devDependencies": {
-    "@salesforce/dev-scripts": "10.2.11",
+    "@salesforce/dev-scripts": "10.2.12",
     "execa": "9.5.2",
-    "oclif": "4.17.27"
+    "oclif": "4.17.34"
   },
+  "exports": "./lib/index.js",
   "files": [
     "/bin",
     "/lib",
@@ -34,7 +35,12 @@
     "topicSeparator": " ",
     "additionalHelpFlags": [
       "-h"
-    ]
+    ],
+    "topics": {
+      "crud-mdapi": {
+        "description": "Work with the CRUD Metadata API."
+      }
+    }
   },
   "mocha": {
     "loader": "ts-node/esm",
@@ -45,7 +51,7 @@
     "build": "rm -rf lib && tsc -p . && oclif manifest",
     "prepack": "npm run build",
     "prepare": "npm run build",
-    "test": "tsc -p test && nyc --reporter=lcov --reporter=text mocha \"test/**/*.test.ts\"",
+    "test": "tsc -p test && mocha \"test/**/*.test.ts\"",
     "test:e2e": "tsc -p test && mocha --timeout 60000 \"test/**/*.e2e.ts\""
   }
 }

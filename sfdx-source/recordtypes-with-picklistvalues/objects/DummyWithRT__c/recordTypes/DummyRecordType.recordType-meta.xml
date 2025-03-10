@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DummyRecordType</fullName>
+    <active>true</active>
+    <label>DummyRecordType</label>
+    <picklistValues>
+        <picklist>Type__c</picklist>
+        <values>
+            <fullName>One</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Three</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Two</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>
