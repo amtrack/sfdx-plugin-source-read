@@ -27,7 +27,7 @@ sf plugins install sfdx-plugin-source-read
 ## Usage
 
 ```console
-sf crud-mdapi read --metadata "Profile:Admin"
+sf crud-mdapi read --metadata "Profile:Admin" --metadata "Profile:Standard"
 sf crud-mdapi read --source-dir force-app/main/default/profiles/Admin.profile-meta.xml
 sf crud-mdapi read --metadata "RecordType:Account.Business"
 sf crud-mdapi read --source-dir force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml
