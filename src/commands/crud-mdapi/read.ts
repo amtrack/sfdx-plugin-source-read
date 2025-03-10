@@ -9,7 +9,7 @@ export class CrudMdapiRead extends SfCommand<unknown> {
     "Read Metadata e.g. full Profiles using the CRUD Metadata API, convert the JSON result to XML and write as source format to disk.";
 
   public static readonly examples = [
-    `$ <%= config.bin %> <%= command.id %> --metadata "Profile:Admin"`,
+    `$ <%= config.bin %> <%= command.id %> --metadata "Profile:Admin" --metadata "Profile:Standard"`,
     `$ <%= config.bin %> <%= command.id %> --metadata "RecordType:Account.Business"`,
     `$ <%= config.bin %> <%= command.id %> --metadata "CustomObjectTranslation:Task-de"`,
     `$ <%= config.bin %> <%= command.id %> --source-dir force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml`,
