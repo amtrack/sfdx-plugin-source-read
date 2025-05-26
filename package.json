@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@salesforce/dev-scripts": "10.2.12",
-    "execa": "9.5.2",
+    "execa": "9.6.0",
     "oclif": "4.17.37"
   },
   "exports": "./lib/index.js",
