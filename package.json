@@ -1,7 +1,7 @@
 {
   "name": "sfdx-plugin-source-read",
   "version": "0.0.0-development",
-  "description": "sfdx plugin to read Metadata e.g. full Profiles via CRUD Metadata API",
+  "description": "sfdx plugin to read and upsert Metadata e.g. full Profiles via CRUD Metadata API",
   "keywords": [
     "sfdx-plugin",
     "sf-plugin"

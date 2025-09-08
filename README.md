@@ -1,6 +1,6 @@
 # sfdx-plugin-source-read
 
-> sfdx/sf plugin to read Metadata e.g. full Profiles via CRUD Metadata API
+> sfdx/sf plugin to read and upsert Metadata e.g. full Profiles via CRUD Metadata API
 
 For certain Metadata Types there is a different behaviour of the [file-based](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_retrieve.htm) vs. [CRUD-based](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_readMetadata.htm) Metadata API.
 
@@ -12,6 +12,8 @@ And additionally the file-based Metadata API even behaves differently for source
 > Read more about about this in my [mdapi-issues/retrieve-behavior-scratch-org](https://github.com/mdapi-issues/retrieve-behavior-scratch-org) repository.
 
 This plugin provides a `sf crud-mdapi read` (formerly `sf force source read`) command to read Metadata using the "CRUD-based" Metadata API similar to `sf project retrieve start` (which uses the "file-based" Metadata API).
+
+This plugin also provides a `sf crud-mdapi upsert` command to upsert Metadata using the "CRUD-based" Metadata API similar to `sf project deploy start` (which uses the "file-based" Metadata API).
 
 > [!NOTE]
 > This plugin simply returns the unfiltered response from the CRUD-based Metadata API.
@@ -32,6 +34,9 @@ sf crud-mdapi read --source-dir force-app/main/default/profiles/Admin.profile-me
 sf crud-mdapi read --metadata "RecordType:Account.Business"
 sf crud-mdapi read --source-dir force-app/main/default/objects/Account/recordTypes/Business.recordType-meta.xml
 sf crud-mdapi read --metadata "CustomObjectTranslation:Task-de"
+sf crud-mdapi upsert --metadata "Profile:Admin" --metadata "Profile:Standard"
+sf crud-mdapi upsert --source-dir force-app/main/default/profiles/Admin.profile-meta.xml
+sf crud-mdapi upsert --manifest package.xml
 ```
 
 ## Example

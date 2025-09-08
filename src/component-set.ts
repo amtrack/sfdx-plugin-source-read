@@ -1,4 +1,7 @@
-import type { MetadataType as MetadataTypeName } from "@jsforce/jsforce-node/lib/api/metadata.js";
+import type {
+  Metadata,
+  MetadataType as MetadataTypeName,
+} from "@jsforce/jsforce-node/lib/api/metadata.js";
 import type { Connection } from "@salesforce/core";
 import {
   ComponentSet,
@@ -10,7 +13,7 @@ import {
   type MetadataComponent,
 } from "@salesforce/source-deploy-retrieve";
 import { basename, dirname, join, relative } from "node:path";
-import { fetchMetadataFromOrg } from "./crud-mdapi.js";
+import { fetchMetadataFromOrg, upsertMetadataInOrg } from "./crud-mdapi.js";
 import {
   cloneSourceComponent,
   createSourceComponentWithMetadata,
@@ -140,6 +143,92 @@ export async function readFromOrg(
           metadataResult
         );
         resultSet.add(component);
+      }
+    }
+  }
+
+  return resultSet;
+}
+
+/**
+ * Builds the Metadata payload for a source component, composing in any
+ * decomposed children that aren't independently addressable via the
+ * Metadata API (e.g. CustomFieldTranslation is only reachable through its
+ * parent CustomObjectTranslation).
+ */
+function composeMetadata(sourceComponent: SourceComponent): Metadata {
+  const typeName = sourceComponent.type.name;
+  const xml = sourceComponent.parseXmlSync();
+  const metadata = { ...(xml[typeName] as Metadata) };
+  delete metadata["@_xmlns"];
+
+  const directories = sourceComponent.type.children?.directories ?? {};
+  for (const child of sourceComponent.getChildren()) {
+    if (child.type.isAddressable !== false) {
+      continue;
+    }
+    const arrayKey = Object.entries(directories).find(
+      ([, typeId]) => typeId === child.type.id
+    )?.[0];
+    if (!arrayKey) {
+      continue;
+    }
+    const childXml = child.parseXmlSync();
+    const childMetadata = childXml[child.type.name] as Metadata;
+    delete childMetadata["@_xmlns"];
+    const existing = (metadata[arrayKey] as Metadata[]) ?? [];
+    metadata[arrayKey] = [...existing, childMetadata];
+  }
+  return metadata;
+}
+
+export async function upsertInOrg(
+  componentSet: ComponentSet,
+  connection: Connection,
+  maxChunkSize?: number
+): Promise<ComponentSet> {
+  const componentsByType = groupBy(
+    componentSet.toArray(),
+    (cmp) => cmp.type.name
+  );
+  const resultSet = new ComponentSet();
+
+  const allSourceComponents = componentSet.getSourceComponents();
+  for (const [typeName, metadataComponents] of Object.entries(
+    componentsByType
+  )) {
+    const chunkSize =
+      maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
+
+    for (const chunkOfComponents of chunk(metadataComponents, chunkSize)) {
+      const metadataWithFullNames = chunkOfComponents.map((cmp) => {
+        const sourceComponent = allSourceComponents.find(
+          (sc) => sc.type.name === typeName && sc.fullName === cmp.fullName
+        );
+        if (!sourceComponent) {
+          throw new Error(
+            `Failed to find source for ${typeName}:${cmp.fullName}`
+          );
+        }
+        return {
+          ...composeMetadata(sourceComponent),
+          fullName: cmp.fullName,
+        };
+      });
+
+      const metadataResults = await upsertMetadataInOrg(
+        connection,
+        typeName,
+        metadataWithFullNames
+      );
+      for (const [index, metadataResult] of metadataResults.entries()) {
+        const metadataComponent = chunkOfComponents[index];
+        if (!metadataResult?.fullName) {
+          throw new Error(
+            `Failed to upsert ${metadataComponent.type.name}:${metadataComponent.fullName}`
+          );
+        }
+        resultSet.add(metadataComponent);
       }
     }
   }
