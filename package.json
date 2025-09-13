@@ -53,5 +53,8 @@
     "prepare": "npm run build",
     "test": "tsc -p test && mocha \"test/**/*.test.ts\"",
     "test:e2e": "tsc -p test && mocha --timeout 60000 \"test/**/*.e2e.ts\""
+  },
+  "publishConfig": {
+    "provenance": true
   }
 }
