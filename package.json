@@ -1,12 +1,47 @@
 {
   "name": "sfdx-plugin-source-read",
-  "description": "sfdx plugin to read Metadata e.g. full Profiles via CRUD Metadata API",
   "version": "0.0.0-development",
+  "description": "sfdx plugin to read Metadata e.g. full Profiles via CRUD Metadata API",
+  "keywords": [
+    "sfdx-plugin",
+    "sf-plugin"
+  ],
+  "repository": "amtrack/sfdx-plugin-source-read",
+  "license": "MIT",
   "author": "Matthias Rolke @amtrack",
-  "bugs": "https://github.com/amtrack/sfdx-plugin-source-read/issues",
   "type": "module",
+  "exports": "./lib/index.js",
   "bin": {
     "sfdx-plugin-source-read": "bin/run.js"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/oclif.manifest.json"
+  ],
+  "scripts": {
+    "build": "rm -rf lib && tsc -p . && oclif manifest",
+    "prepack": "npm run build",
+    "prepare": "npm run build",
+    "test": "tsc -p test && mocha \"test/**/*.test.ts\"",
+    "test:e2e": "tsc -p test && mocha --timeout 60000 \"test/**/*.e2e.ts\""
+  },
+  "mocha": {
+    "loader": "ts-node/esm",
+    "no-warnings": "ExperimentalWarning"
+  },
+  "oclif": {
+    "additionalHelpFlags": [
+      "-h"
+    ],
+    "bin": "sf",
+    "commands": "./lib/commands",
+    "topicSeparator": " ",
+    "topics": {
+      "crud-mdapi": {
+        "description": "Work with the CRUD Metadata API."
+      }
+    }
   },
   "dependencies": {
     "@salesforce/sf-plugins-core": "12.2.4",
@@ -16,43 +51,6 @@
     "@salesforce/dev-scripts": "11.0.4",
     "execa": "9.6.0",
     "oclif": "4.22.22"
-  },
-  "exports": "./lib/index.js",
-  "files": [
-    "/bin",
-    "/lib",
-    "/oclif.manifest.json"
-  ],
-  "homepage": "https://github.com/amtrack/sfdx-plugin-source-read",
-  "keywords": [
-    "sfdx-plugin",
-    "sf-plugin"
-  ],
-  "license": "MIT",
-  "oclif": {
-    "commands": "./lib/commands",
-    "bin": "sf",
-    "topicSeparator": " ",
-    "additionalHelpFlags": [
-      "-h"
-    ],
-    "topics": {
-      "crud-mdapi": {
-        "description": "Work with the CRUD Metadata API."
-      }
-    }
-  },
-  "mocha": {
-    "loader": "ts-node/esm",
-    "no-warnings": "ExperimentalWarning"
-  },
-  "repository": "amtrack/sfdx-plugin-source-read",
-  "scripts": {
-    "build": "rm -rf lib && tsc -p . && oclif manifest",
-    "prepack": "npm run build",
-    "prepare": "npm run build",
-    "test": "tsc -p test && mocha \"test/**/*.test.ts\"",
-    "test:e2e": "tsc -p test && mocha --timeout 60000 \"test/**/*.e2e.ts\""
   },
   "publishConfig": {
     "provenance": true
