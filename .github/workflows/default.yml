@@ -28,6 +28,7 @@ jobs:
           SFDX_AUTH_URL_DEVED: ${{ secrets.SFDX_AUTH_URL_DEVED }}
         run: |
           echo "${SFDX_AUTH_URL_DEVED}" | sf org login sfdx-url --set-default --alias deved --sfdx-url-stdin
+          npm run build
           npm run test:e2e
   release:
     needs: test
