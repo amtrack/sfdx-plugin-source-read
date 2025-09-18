@@ -1,4 +1,7 @@
-import type { MetadataType as MetadataTypeName } from "@jsforce/jsforce-node/lib/api/metadata.js";
+import type {
+  Metadata,
+  MetadataType as MetadataTypeName,
+} from "@jsforce/jsforce-node/lib/api/metadata.js";
 import type { Connection } from "@salesforce/core";
 import {
   ComponentSet,
@@ -6,7 +9,7 @@ import {
   RegistryAccess,
   type MetadataComponent,
 } from "@salesforce/source-deploy-retrieve";
-import { fetchMetadataFromOrg } from "./crud-mdapi.js";
+import { fetchMetadataFromOrg, upsertMetadataInOrg } from "./crud-mdapi.js";
 import {
   cloneSourceComponent,
   createSourceComponentWithMetadata,
@@ -93,6 +96,60 @@ export async function readFromOrg(
           metadataResult
         );
         resultSet.add(component);
+      }
+    }
+  }
+
+  return resultSet;
+}
+
+export async function upsertInOrg(
+  componentSet: ComponentSet,
+  connection: Connection,
+  maxChunkSize?: number
+): Promise<ComponentSet> {
+  const componentsByType = groupBy(
+    componentSet.toArray(),
+    (cmp) => cmp.type.name
+  );
+  const resultSet = new ComponentSet();
+
+  const allSourceComponents = componentSet.getSourceComponents();
+  for (const [typeName, metadataComponents] of Object.entries(
+    componentsByType
+  )) {
+    const chunkSize =
+      maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
+
+    for (const chunkOfComponents of chunk(metadataComponents, chunkSize)) {
+      const members = chunkOfComponents.map((cmp) => cmp.fullName);
+      const sourceComponents = allSourceComponents.filter(
+        (sc) => sc.type.name === typeName && members.includes(sc.fullName)
+      );
+      const xmls = sourceComponents.map((sc) => sc.parseXmlSync()).toArray();
+      const metadataWithFullNames = xmls.map((x, i) => {
+        const metadata = x[typeName] as Metadata;
+        delete metadata["@_xmlns"];
+        const fullName = members[i];
+        return {
+          fullName,
+          ...metadata,
+        };
+      });
+
+      const metadataResults = await upsertMetadataInOrg(
+        connection,
+        typeName,
+        metadataWithFullNames
+      );
+      for (const [index, metadataResult] of metadataResults.entries()) {
+        const metadataComponent = chunkOfComponents[index];
+        if (!metadataResult?.fullName) {
+          throw new Error(
+            `Failed to upsert ${metadataComponent.type.name}:${metadataComponent.fullName}`
+          );
+        }
+        resultSet.add(metadataComponent);
       }
     }
   }
