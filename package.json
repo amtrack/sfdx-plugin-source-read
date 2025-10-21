@@ -51,8 +51,5 @@
     "@salesforce/dev-scripts": "11.0.4",
     "execa": "9.6.0",
     "oclif": "4.22.27"
-  },
-  "publishConfig": {
-    "provenance": true
   }
 }
