@@ -7,6 +7,43 @@ import { run } from "../../e2e.js";
 const DEFAULT_PACKAGE_DIR = join("force-app", "main", "default");
 
 describe("crud-mdapi read", () => {
+  describe("flags-dir", async () => {
+    afterEach("delete", async function () {
+      rmSync(DEFAULT_PACKAGE_DIR, {
+        recursive: true,
+      });
+    });
+    it("reads a CustomField without flags-dir", async () => {
+      await run(`crud-mdapi read --metadata CustomField:Account.Name`);
+      expect(
+        readFileSync(
+          join(
+            DEFAULT_PACKAGE_DIR,
+            "objects",
+            "Account",
+            "fields",
+            "Name.field-meta.xml"
+          ),
+          "utf8"
+        ).split("\n")
+      ).to.contain(`    <fullName>Name</fullName>`);
+    });
+    it("reads a CustomField with flags-dir", async () => {
+      await run(`crud-mdapi read --flags-dir test/fixtures/myflags`);
+      expect(
+        readFileSync(
+          join(
+            DEFAULT_PACKAGE_DIR,
+            "objects",
+            "Account",
+            "fields",
+            "Name.field-meta.xml"
+          ),
+          "utf8"
+        ).split("\n")
+      ).to.contain(`    <fullName>Name</fullName>`);
+    });
+  });
   describe("CustomObjectTranslations with FieldTranslations", async () => {
     before("deploy", async function () {
       this.timeout(300 * 1000);
@@ -46,6 +83,7 @@ describe("crud-mdapi read", () => {
         "project",
         "delete",
         "source",
+        "--json",
         "--no-prompt",
         "--metadata",
         "CustomObject:Dummy__c",
@@ -80,6 +118,7 @@ describe("crud-mdapi read", () => {
         "project",
         "delete",
         "source",
+        "--json",
         "--no-prompt",
         "--metadata",
         "CustomField:Account.IsTest__c",
@@ -139,6 +178,7 @@ describe("crud-mdapi read", () => {
         "project",
         "delete",
         "source",
+        "--json",
         "--no-prompt",
         "--metadata",
         "CustomObject:DummyWithRT__c",
@@ -180,6 +220,7 @@ describe("crud-mdapi read", () => {
         "project",
         "delete",
         "source",
+        "--json",
         "--no-prompt",
         "--metadata",
         "CustomLabel:Greeting",
