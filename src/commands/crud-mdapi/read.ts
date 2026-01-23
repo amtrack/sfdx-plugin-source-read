@@ -1,9 +1,13 @@
 import { Flags, SfCommand } from "@salesforce/sf-plugins-core";
 import { ComponentSetBuilder } from "@salesforce/source-deploy-retrieve";
-import { readFromOrg } from "../../component-set.js";
-import { writeComponentSetToDisk } from "../../component-set.js";
+import { readFromOrg, writeComponentSetToDisk } from "../../component-set.js";
 
-export class CrudMdapiRead extends SfCommand<unknown> {
+type CrudMdapiReadResult = {
+  success: boolean;
+  files: Awaited<ReturnType<typeof writeComponentSetToDisk>>;
+};
+
+export class CrudMdapiRead extends SfCommand<CrudMdapiReadResult> {
   public static readonly summary = "Read Metadata using the CRUD Metadata API";
   public static readonly description =
     "Read Metadata e.g. full Profiles using the CRUD Metadata API, convert the JSON result to XML and write as source format to disk.";
@@ -53,7 +57,7 @@ export class CrudMdapiRead extends SfCommand<unknown> {
 
   public static readonly requiresProject = true;
 
-  public async run(): Promise<unknown> {
+  public async run(): Promise<CrudMdapiReadResult> {
     const { flags } = await this.parse(CrudMdapiRead);
 
     // 1/4 build a ComponentSet from the flags
