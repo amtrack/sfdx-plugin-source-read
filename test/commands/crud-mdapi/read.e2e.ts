@@ -11,6 +11,7 @@ describe("crud-mdapi read", () => {
     afterEach("delete", async function () {
       rmSync(DEFAULT_PACKAGE_DIR, {
         recursive: true,
+        force: true,
       });
     });
     it("reads a CustomField without flags-dir", async () => {
