@@ -44,12 +44,12 @@
     }
   },
   "dependencies": {
-    "@salesforce/sf-plugins-core": "12.2.4",
-    "@salesforce/source-deploy-retrieve": "12.22.13"
+    "@salesforce/sf-plugins-core": "12.2.6",
+    "@salesforce/source-deploy-retrieve": "12.31.8"
   },
   "devDependencies": {
     "@salesforce/dev-scripts": "11.0.4",
-    "execa": "9.6.0",
-    "oclif": "4.22.27"
+    "execa": "9.6.1",
+    "oclif": "4.22.70"
   }
 }
