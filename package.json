@@ -6,7 +6,10 @@
     "sfdx-plugin",
     "sf-plugin"
   ],
-  "repository": "amtrack/sfdx-plugin-source-read",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amtrack/sfdx-plugin-source-read.git"
+  },
   "license": "MIT",
   "author": "Matthias Rolke @amtrack",
   "type": "module",
