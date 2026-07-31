@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@salesforce/dev-scripts": "11.0.4",
-    "execa": "10.0.0",
+    "execa": "10.0.1",
     "oclif": "4.23.27"
   }
 }
