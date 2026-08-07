@@ -1,4 +1,4 @@
-import { Flags, SfCommand } from "@salesforce/sf-plugins-core";
+import { Flags, SfCommand, SfFlags } from "@salesforce/sf-plugins-core";
 import { ComponentSetBuilder } from "@salesforce/source-deploy-retrieve";
 import { readFromOrg, writeComponentSetToDisk } from "../../component-set.js";
 
@@ -20,6 +20,7 @@ export class CrudMdapiRead extends SfCommand<CrudMdapiReadResult> {
   ];
 
   public static readonly flags = {
+    ...SfFlags.flagsDir(),
     "target-org": Flags.requiredOrg(),
     metadata: Flags.string({
       char: "m",
