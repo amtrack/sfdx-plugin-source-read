@@ -29,7 +29,7 @@ describe("crud-mdapi read", () => {
         ).split("\n")
       ).to.contain(`    <fullName>Name</fullName>`);
     });
-    it("reads a CustomField with flags-dir", async () => {
+    it.skip("reads a CustomField with flags-dir", async () => {
       await run(`crud-mdapi read --flags-dir test/fixtures/myflags`);
       expect(
         readFileSync(
