@@ -26,6 +26,7 @@
     "build": "rm -rf lib && tsc -p . && oclif manifest",
     "prepack": "npm run build",
     "prepare": "npm run build",
+    "format": "prettier --write src test bin",
     "test": "tsc -p test && mocha \"test/**/*.test.ts\"",
     "test:e2e": "tsc -p test && mocha --timeout 60000 \"test/**/*.e2e.ts\""
   },
