@@ -24,7 +24,32 @@ describe("ComponentSet", () => {
         )
       );
       const files = await writeComponentSetToDisk(componentSet, "./tmp");
-      expect(files).to.have.length.greaterThanOrEqual(2);
+      expect(files).to.deep.equal([
+        {
+          fullName: "Dummy__c-en_US",
+          type: "CustomObjectTranslation",
+          filePath: join(
+            "./tmp",
+            "main",
+            "default",
+            "objectTranslations",
+            "Dummy__c-en_US",
+            "Dummy__c-en_US.objectTranslation-meta.xml"
+          ),
+        },
+        {
+          fullName: "Dummy__c-en_US.Type__c",
+          type: "CustomFieldTranslation",
+          filePath: join(
+            "./tmp",
+            "main",
+            "default",
+            "objectTranslations",
+            "Dummy__c-en_US",
+            "Type__c.fieldTranslation-meta.xml"
+          ),
+        },
+      ]);
       expect(
         readFileSync(
           join(

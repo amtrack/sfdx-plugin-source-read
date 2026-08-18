@@ -7,3 +7,11 @@ export async function run(pluginCommand) {
     parseCommandString(pluginCommand)
   );
 }
+
+export async function runJson<T = unknown>(pluginCommand: string): Promise<T> {
+  const { stdout } = await execa(
+    resolve("bin", "run.js"),
+    parseCommandString(`${pluginCommand} --json`)
+  );
+  return JSON.parse(stdout).result as T;
+}
