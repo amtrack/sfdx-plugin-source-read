@@ -3,10 +3,13 @@ import type { Connection } from "@salesforce/core";
 import {
   ComponentSet,
   MetadataConverter,
+  MetadataResolver,
   RegistryAccess,
   SourceComponent,
+  ZipTreeContainer,
   type MetadataComponent,
 } from "@salesforce/source-deploy-retrieve";
+import { basename, dirname, join } from "node:path";
 import { fetchMetadataFromOrg } from "./crud-mdapi.js";
 import {
   cloneSourceComponent,
@@ -34,6 +37,33 @@ export async function writeComponentSetToDisk(
       )
     );
   }
+
+  // `converted` reports one duplicate entry per written file for
+  // "topLevel"-decomposed types (e.g. CustomObjectTranslation), all
+  // misattributed to the parent component. Converting once into an
+  // in-memory zip and resolving components directly from it lets us
+  // safely call getChildren() on the parent to learn which children were
+  // actually written and their file names, without the risk of also
+  // picking up unrelated pre-existing files that happen to sit next to
+  // the real merge target (or touching disk).
+  const registry = new RegistryAccess();
+  const { zipBuffer } = await new MetadataConverter().convert(
+    tempComponentSet,
+    "source",
+    { type: "zip" }
+  );
+  const zipTree = await ZipTreeContainer.create(zipBuffer);
+  const scratchComponents = new MetadataResolver(
+    registry,
+    zipTree
+  ).getComponentsFromPath(".");
+  const composedChildrenByParent = new Map(
+    new ComponentSet(scratchComponents, registry)
+      .getSourceComponents()
+      .toArray()
+      .map((c) => [`${c.type.name}:${c.fullName}`, c.getChildren()])
+  );
+
   const convertResult = await new MetadataConverter().convert(
     tempComponentSet,
     "source",
@@ -43,11 +73,22 @@ export async function writeComponentSetToDisk(
       defaultDirectory: outputDirectory,
     }
   );
-  const files: File[] = convertResult.converted.map((c) => ({
-    fullName: c.fullName,
-    type: c.type.name,
-    filePath: c.xml,
-  }));
+  const files: File[] = new ComponentSet(convertResult.converted, registry)
+    .getSourceComponents()
+    .toArray()
+    .flatMap((c) => {
+      const children =
+        composedChildrenByParent.get(`${c.type.name}:${c.fullName}`) ?? [];
+      return [
+        { fullName: c.fullName, type: c.type.name, filePath: c.xml },
+        ...children.map((child) => ({
+          fullName: child.fullName,
+          type: child.type.name,
+          filePath:
+            c.xml && child.xml ? join(dirname(c.xml), basename(child.xml)) : "",
+        })),
+      ];
+    });
   return files;
 }
 
