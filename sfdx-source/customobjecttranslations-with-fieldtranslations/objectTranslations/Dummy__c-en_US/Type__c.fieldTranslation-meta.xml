@@ -3,4 +3,16 @@
     <help>TEST help text</help>
     <label>TEST Type</label>
     <name>Type__c</name>
+    <picklistValues>
+        <masterLabel>One</masterLabel>
+        <translation>Test One</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Two</masterLabel>
+        <translation>Test Two</translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Three</masterLabel>
+        <translation>Test Three</translation>
+    </picklistValues>
 </CustomFieldTranslation>
