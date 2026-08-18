@@ -4,6 +4,7 @@ import {
   ComponentSet,
   MetadataConverter,
   RegistryAccess,
+  SourceComponent,
   type MetadataComponent,
 } from "@salesforce/source-deploy-retrieve";
 import { fetchMetadataFromOrg } from "./crud-mdapi.js";
@@ -17,7 +18,8 @@ type File = { type: string; fullName: string; filePath: string };
 
 export async function writeComponentSetToDisk(
   componentSet: ComponentSet,
-  outputDirectory: string
+  outputDirectory: string,
+  mergeWith: Iterable<SourceComponent> = []
 ): Promise<File[]> {
   // NOTE: source-to-source conversion somehow produces incorrect file results for certain metadata types
   // Examples issues:
@@ -37,7 +39,7 @@ export async function writeComponentSetToDisk(
     "source",
     {
       type: "merge",
-      mergeWith: [],
+      mergeWith,
       defaultDirectory: outputDirectory,
     }
   );

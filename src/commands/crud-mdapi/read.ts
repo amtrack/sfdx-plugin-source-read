@@ -100,7 +100,10 @@ export class CrudMdapiRead extends SfCommand<CrudMdapiReadResult> {
     // 3/4 write the components of the ComponentSet to disk
     const files = await writeComponentSetToDisk(
       readComponentSet,
-      flags["output-dir"] ?? this.project.getDefaultPackage().path
+      flags["output-dir"] ?? this.project.getDefaultPackage().path,
+      flags["source-dir"] && !flags["output-dir"]
+        ? componentSet.getSourceComponents()
+        : []
     );
 
     // 4/4 print the result: type, name and file path
