@@ -9,7 +9,7 @@ import {
   ZipTreeContainer,
   type MetadataComponent,
 } from "@salesforce/source-deploy-retrieve";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, join, relative } from "node:path";
 import { fetchMetadataFromOrg } from "./crud-mdapi.js";
 import {
   cloneSourceComponent,
@@ -88,7 +88,11 @@ export async function writeComponentSetToDisk(
             c.xml && child.xml ? join(dirname(c.xml), basename(child.xml)) : "",
         })),
       ];
-    });
+    })
+    .map((file) => ({
+      ...file,
+      filePath: file.filePath ? relative(process.cwd(), file.filePath) : "",
+    }));
   return files;
 }
 
