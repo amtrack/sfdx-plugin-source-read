@@ -64,9 +64,9 @@ export class CrudMdapiUpdate extends SfCommand<unknown> {
         ? {
             manifest: {
               manifestPath: flags.manifest,
-              directoryPaths: this.project
-                .getUniquePackageDirectories()
-                .map((dir) => dir.fullPath),
+              directoryPaths: this.project!.getUniquePackageDirectories().map(
+                (dir) => dir.fullPath
+              ),
             },
           }
         : {}),
@@ -74,9 +74,9 @@ export class CrudMdapiUpdate extends SfCommand<unknown> {
         ? {
             metadata: {
               metadataEntries: flags.metadata,
-              directoryPaths: this.project
-                .getUniquePackageDirectories()
-                .map((dir) => dir.fullPath),
+              directoryPaths: this.project!.getUniquePackageDirectories().map(
+                (dir) => dir.fullPath
+              ),
             },
           }
         : {}),

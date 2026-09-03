@@ -9,3 +9,4 @@ node_modules/
 .sf/
 /oclif.manifest.json
 /force-app/main/
+.fallow/

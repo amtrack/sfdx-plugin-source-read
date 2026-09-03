@@ -7,6 +7,7 @@ import {
   ComponentSet,
   MetadataConverter,
   MetadataResolver,
+  MetadataType,
   RegistryAccess,
   SourceComponent,
   ZipTreeContainer,
@@ -53,8 +54,13 @@ export async function writeComponentSetToDisk(
   const { zipBuffer } = await new MetadataConverter().convert(
     tempComponentSet,
     "source",
-    { type: "zip" }
+    {
+      type: "zip",
+    }
   );
+  if (!zipBuffer) {
+    throw new Error("zipBuffer is undefined");
+  }
   const zipTree = await ZipTreeContainer.create(zipBuffer);
   const scratchComponents = new MetadataResolver(
     registry,
@@ -108,46 +114,48 @@ export async function readFromOrg(
     componentSet.toArray(),
     (cmp) => cmp.type.name
   );
-  const resultSet = new ComponentSet();
   const registry = new RegistryAccess();
+  const resultSet = new ComponentSet();
 
   for (const [typeName, metadataComponents] of Object.entries(
     componentsByType
   )) {
-    const parentType = registry.getParentType(typeName);
-    const metadataComponentsWithParents = addFakeParentToMetadataComponents(
-      parentType,
-      metadataComponents
-    );
-    const chunkSize =
-      maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
-
-    for (const chunkOfComponents of chunk(
-      metadataComponentsWithParents,
-      chunkSize
+    for (const component of await readComponentsOfType(
+      connection,
+      registry,
+      typeName,
+      metadataComponents,
+      maxChunkSize
     )) {
-      const metadataResults = await fetchMetadataFromOrg(
-        connection,
-        typeName,
-        chunkOfComponents.map((cmp) => cmp.fullName)
-      );
-      for (const [index, metadataResult] of metadataResults.entries()) {
-        const metadataComponent = chunkOfComponents[index];
-        if (!metadataResult?.fullName) {
-          throw new Error(
-            `Failed to retrieve ${metadataComponent.type.name}:${metadataComponent.fullName}`
-          );
-        }
-        const component = await createSourceComponentWithMetadata(
-          metadataComponent,
-          metadataResult
-        );
-        resultSet.add(component);
-      }
+      resultSet.add(component);
     }
   }
 
   return resultSet;
+}
+
+/**
+ * Composes a decomposed child's metadata into its parent's array field, or
+ * returns undefined if the child is independently addressable (and thus
+ * not part of the parent's payload).
+ */
+function composeChildMetadata(
+  child: SourceComponent,
+  directories: Record<string, string>
+): [arrayKey: string, childMetadata: Metadata] | undefined {
+  if (child.type.isAddressable !== false) {
+    return undefined;
+  }
+  const arrayKey = Object.entries(directories).find(
+    ([, typeId]) => typeId === child.type.id
+  )?.[0];
+  if (!arrayKey) {
+    return undefined;
+  }
+  const childXml = child.parseXmlSync();
+  const childMetadata = childXml[child.type.name] as Metadata;
+  delete childMetadata["@_xmlns"];
+  return [arrayKey, childMetadata];
 }
 
 /**
@@ -163,21 +171,16 @@ function composeMetadata(sourceComponent: SourceComponent): Metadata {
   delete metadata["@_xmlns"];
 
   const directories = sourceComponent.type.children?.directories ?? {};
-  for (const child of sourceComponent.getChildren()) {
-    if (child.type.isAddressable !== false) {
-      continue;
-    }
-    const arrayKey = Object.entries(directories).find(
-      ([, typeId]) => typeId === child.type.id
-    )?.[0];
-    if (!arrayKey) {
-      continue;
-    }
-    const childXml = child.parseXmlSync();
-    const childMetadata = childXml[child.type.name] as Metadata;
-    delete childMetadata["@_xmlns"];
-    const existing = (metadata[arrayKey] as Metadata[]) ?? [];
-    metadata[arrayKey] = [...existing, childMetadata];
+  const composedChildren = sourceComponent
+    .getChildren()
+    .map((child) => composeChildMetadata(child, directories))
+    .filter((composed) => composed !== undefined);
+  const childrenByArrayKey = groupBy(
+    composedChildren,
+    ([arrayKey]) => arrayKey
+  );
+  for (const [arrayKey, entries] of Object.entries(childrenByArrayKey)) {
+    metadata[arrayKey] = entries.map(([, childMetadata]) => childMetadata);
   }
   return metadata;
 }
@@ -193,51 +196,150 @@ export async function upsertInOrg(
   );
   const resultSet = new ComponentSet();
 
-  const allSourceComponents = componentSet.getSourceComponents();
+  const allSourceComponents = componentSet.getSourceComponents().toArray();
   for (const [typeName, metadataComponents] of Object.entries(
     componentsByType
   )) {
-    const chunkSize =
-      maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
-
-    for (const chunkOfComponents of chunk(metadataComponents, chunkSize)) {
-      const metadataWithFullNames = chunkOfComponents.map((cmp) => {
-        const sourceComponent = allSourceComponents.find(
-          (sc) => sc.type.name === typeName && sc.fullName === cmp.fullName
-        );
-        if (!sourceComponent) {
-          throw new Error(
-            `Failed to find source for ${typeName}:${cmp.fullName}`
-          );
-        }
-        return {
-          ...composeMetadata(sourceComponent),
-          fullName: cmp.fullName,
-        };
-      });
-
-      const metadataResults = await upsertMetadataInOrg(
-        connection,
-        typeName,
-        metadataWithFullNames
-      );
-      for (const [index, metadataResult] of metadataResults.entries()) {
-        const metadataComponent = chunkOfComponents[index];
-        if (!metadataResult?.fullName) {
-          throw new Error(
-            `Failed to upsert ${metadataComponent.type.name}:${metadataComponent.fullName}`
-          );
-        }
-        resultSet.add(metadataComponent);
-      }
+    for (const component of await upsertComponentsOfType(
+      connection,
+      allSourceComponents,
+      typeName,
+      metadataComponents,
+      maxChunkSize
+    )) {
+      resultSet.add(component);
     }
   }
 
   return resultSet;
 }
 
-export function addFakeParentToMetadataComponents(
-  parentType,
+async function upsertComponentsOfType(
+  connection: Connection,
+  allSourceComponents: SourceComponent[],
+  typeName: string,
+  metadataComponents: MetadataComponent[],
+  maxChunkSize?: number
+): Promise<MetadataComponent[]> {
+  const chunkSize =
+    maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
+
+  const components: MetadataComponent[] = [];
+  for (const chunkOfComponents of chunk(metadataComponents, chunkSize)) {
+    components.push(
+      ...(await upsertChunkInOrg(
+        connection,
+        allSourceComponents,
+        typeName,
+        chunkOfComponents
+      ))
+    );
+  }
+  return components;
+}
+
+async function upsertChunkInOrg(
+  connection: Connection,
+  allSourceComponents: SourceComponent[],
+  typeName: string,
+  chunkOfComponents: MetadataComponent[]
+): Promise<MetadataComponent[]> {
+  const metadataWithFullNames = chunkOfComponents.map((cmp) => {
+    const sourceComponent = allSourceComponents.find(
+      (sc) => sc.type.name === typeName && sc.fullName === cmp.fullName
+    );
+    if (!sourceComponent) {
+      throw new Error(`Failed to find source for ${typeName}:${cmp.fullName}`);
+    }
+    return {
+      ...composeMetadata(sourceComponent),
+      fullName: cmp.fullName,
+    };
+  });
+
+  const metadataResults = await upsertMetadataInOrg(
+    connection,
+    typeName,
+    metadataWithFullNames
+  );
+  return validateMetadataResults(chunkOfComponents, metadataResults, "upsert");
+}
+
+/**
+ * Confirms every metadata result in a chunk came back with a fullName,
+ * throwing on the first component whose result is missing one.
+ */
+function validateMetadataResults(
+  chunkOfComponents: MetadataComponent[],
+  metadataResults: Array<{ fullName?: string } | undefined>,
+  action: string
+): MetadataComponent[] {
+  return chunkOfComponents.map((metadataComponent, index) => {
+    const metadataResult = metadataResults[index];
+    if (!metadataResult?.fullName) {
+      throw new Error(
+        `Failed to ${action} ${metadataComponent.type.name}:${metadataComponent.fullName}`
+      );
+    }
+    return metadataComponent;
+  });
+}
+
+async function readComponentsOfType(
+  connection: Connection,
+  registry: RegistryAccess,
+  typeName: string,
+  metadataComponents: MetadataComponent[],
+  maxChunkSize?: number
+): Promise<SourceComponent[]> {
+  const metadataComponentsWithParents = addFakeParentToMetadataComponents(
+    registry.getParentType(typeName),
+    metadataComponents
+  );
+  const chunkSize =
+    maxChunkSize ?? determineMaxChunkSize(typeName as MetadataTypeName);
+
+  const components: SourceComponent[] = [];
+  for (const chunkOfComponents of chunk(
+    metadataComponentsWithParents,
+    chunkSize
+  )) {
+    components.push(
+      ...(await readChunkFromOrg(connection, typeName, chunkOfComponents))
+    );
+  }
+  return components;
+}
+
+async function readChunkFromOrg(
+  connection: Connection,
+  typeName: string,
+  chunkOfComponents: MetadataComponent[]
+): Promise<SourceComponent[]> {
+  const metadataResults = await fetchMetadataFromOrg(
+    connection,
+    typeName,
+    chunkOfComponents.map((cmp) => cmp.fullName)
+  );
+  const validated = validateMetadataResults(
+    chunkOfComponents,
+    metadataResults,
+    "retrieve"
+  );
+  const components: SourceComponent[] = [];
+  for (const [index, metadataComponent] of validated.entries()) {
+    components.push(
+      await createSourceComponentWithMetadata(
+        metadataComponent,
+        metadataResults[index]
+      )
+    );
+  }
+  return components;
+}
+
+function addFakeParentToMetadataComponents(
+  parentType: MetadataType | undefined,
   metadataComponents: MetadataComponent[]
 ) {
   return !parentType
