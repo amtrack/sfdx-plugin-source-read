@@ -61,46 +61,19 @@ export class CrudMdapiRead extends SfCommand<CrudMdapiReadResult> {
     const { flags } = await this.parse(CrudMdapiRead);
 
     // 1/4 build a ComponentSet from the flags
-    const componentSet = await ComponentSetBuilder.build({
-      sourcepath: flags["source-dir"],
-      ...(flags.manifest
-        ? {
-            manifest: {
-              manifestPath: flags.manifest,
-              directoryPaths: flags["output-dir"]
-                ? []
-                : this.project
-                    .getUniquePackageDirectories()
-                    .map((dir) => dir.fullPath),
-            },
-          }
-        : {}),
-      ...(flags.metadata
-        ? {
-            metadata: {
-              metadataEntries: flags.metadata,
-              directoryPaths: flags["output-dir"]
-                ? []
-                : this.project
-                    .getUniquePackageDirectories()
-                    .map((dir) => dir.fullPath),
-            },
-          }
-        : {}),
-    });
+    const componentSet = await this.buildComponentSet(flags);
 
     // 2/4 read the components from the org to a new ComponentSet
-    const connection = flags["target-org"].getConnection();
     const readComponentSet = await readFromOrg(
       componentSet,
-      connection,
+      flags["target-org"].getConnection(),
       flags["chunk-size"]
     );
 
     // 3/4 write the components of the ComponentSet to disk
     const files = await writeComponentSetToDisk(
       readComponentSet,
-      flags["output-dir"] ?? this.project.getDefaultPackage().path,
+      flags["output-dir"] ?? this.project!.getDefaultPackage().path,
       flags["source-dir"] && !flags["output-dir"]
         ? componentSet.getSourceComponents()
         : []
@@ -116,9 +89,31 @@ export class CrudMdapiRead extends SfCommand<CrudMdapiReadResult> {
         { name: "Path", key: "filePath" },
       ],
     });
+
     return {
       success: true,
       files,
     };
+  }
+
+  private buildComponentSet(
+    flags: Awaited<ReturnType<CrudMdapiRead["parse"]>>["flags"]
+  ): ReturnType<typeof ComponentSetBuilder.build> {
+    const directoryPaths = this.directoryPaths(flags["output-dir"]);
+    return ComponentSetBuilder.build({
+      sourcepath: flags["source-dir"],
+      ...(flags.manifest
+        ? { manifest: { manifestPath: flags.manifest, directoryPaths } }
+        : {}),
+      ...(flags.metadata
+        ? { metadata: { metadataEntries: flags.metadata, directoryPaths } }
+        : {}),
+    });
+  }
+
+  private directoryPaths(outputDir: string | undefined): string[] {
+    return outputDir
+      ? []
+      : this.project!.getUniquePackageDirectories().map((dir) => dir.fullPath);
   }
 }

@@ -57,11 +57,13 @@ Please migrate to 'sf crud-mdapi read': https://github.com/amtrack/sfdx-plugin-s
 
   public static readonly requiresProject = true;
 
+  // deprecated command kept as-is until removal, not worth refactoring
+  // fallow-ignore-next-line complexity
   public async run(): Promise<any> {
     const { flags } = await this.parse(SourceReadCommand);
     const conn = flags["target-org"].getConnection();
-    const packageDirectories = this.project.getPackageDirectories();
-    const defaultPackageDirectory = this.project.getDefaultPackage().path;
+    const packageDirectories = this.project!.getPackageDirectories();
+    const defaultPackageDirectory = this.project!.getDefaultPackage().path;
     const sourcePaths = packageDirectories.map((dir) => dir.path);
     const componentSet = await ComponentSetBuilder.build({
       sourcepath:

@@ -86,21 +86,22 @@ export async function cloneSourceComponent(
   if (!sourceComponent.xml) {
     return sourceComponent;
   }
-  const xml = fn(sourceComponent.xml);
-  let parent: SourceComponent | undefined;
-  if (sourceComponent.parent) {
-    parent = await cloneSourceComponent(sourceComponent.parent, fn);
-  }
-  const xmlObject = await sourceComponent.parseXml(sourceComponent.xml);
-  const xmlStream = new JsToXml(xmlObject);
-  const tree = await createZipContainer(xmlStream, xml);
-  const clone = new SourceComponent(
-    {
-      ...sourceComponent,
-      xml,
-      ...(parent ? { parent } : {}),
-    },
-    tree ?? tree
+  const clonedParent = sourceComponent.parent
+    ? await cloneSourceComponent(sourceComponent.parent, fn)
+    : sourceComponent.parent;
+  return newClonedComponent(
+    sourceComponent,
+    clonedParent,
+    fn(sourceComponent.xml)
   );
-  return clone;
+}
+
+async function newClonedComponent(
+  sourceComponent: SourceComponent,
+  parent: SourceComponent | undefined,
+  xml: string
+): Promise<SourceComponent> {
+  const xmlObject = await sourceComponent.parseXml(sourceComponent.xml);
+  const tree = await createZipContainer(new JsToXml(xmlObject), xml);
+  return new SourceComponent({ ...sourceComponent, xml, parent }, tree);
 }
