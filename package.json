@@ -52,7 +52,7 @@
     "@salesforce/source-deploy-retrieve": "13.3.0"
   },
   "devDependencies": {
-    "@salesforce/dev-scripts": "13.0.2",
+    "@salesforce/dev-scripts": "14.0.0",
     "execa": "10.0.1",
     "oclif": "5.0.1"
   }
