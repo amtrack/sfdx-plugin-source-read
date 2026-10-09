@@ -48,7 +48,7 @@
     }
   },
   "dependencies": {
-    "@salesforce/sf-plugins-core": "13.0.4",
+    "@salesforce/sf-plugins-core": "13.0.7",
     "@salesforce/source-deploy-retrieve": "13.3.0"
   },
   "devDependencies": {
